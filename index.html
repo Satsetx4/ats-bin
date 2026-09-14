@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Petualangan Detektif Membaca: Ide Pokok & Memahami Isi Bacaan | Kelas 3 SD</title>
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        amber: {
+                            50: '#FFFBEB',
+                            100: '#FEF3C7',
+                            200: '#FDE68A',
+                            300: '#FCD34D',
+                            400: '#FBBF24',
+                            500: '#F59E0B',
+                            600: '#D97706',
+                            700: '#B45309',
+                            800: '#92400E',
+                            900: '#78350F',
+                            950: '#451A03',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Lucide Icons & Canvas Confetti -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/custom.css">
+</head>
+<body class="bg-gradient-to-br from-amber-50 via-sky-50 to-emerald-50 min-h-screen text-slate-800 flex flex-col antialiased">
+
+    <!-- Header / Navbar Utama -->
+    <header class="no-print sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b-2 border-amber-200/80 shadow-sm transition-all">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between gap-4">
+            <div class="flex items-center gap-3">
+                <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-gradient-to-tr from-amber-400 to-amber-300 flex items-center justify-center text-2xl sm:text-3xl shadow-md border-2 border-white animate-bounce-gentle">
+                    🔍
+                </div>
+                <div>
+                    <span class="text-xs font-extrabold uppercase tracking-wider text-amber-600 bg-amber-100 px-2.5 py-0.5 rounded-full inline-block">
+                        Bahasa Indonesia • Kelas 3 SD
+                    </span>
+                    <h1 class="text-lg sm:text-2xl font-black text-slate-900 leading-tight">
+                        Detektif Cilik Membaca
+                    </h1>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-2">
+                <!-- Tombol Audio Mute/Unmute -->
+                <button id="btn-toggle-sound" class="p-2.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-100 transition-colors shadow-sm text-slate-700 flex items-center justify-center" title="Nyalakan / Matikan Suara">
+                    <i data-lucide="volume-2" class="w-5 h-5 text-amber-600"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Tab Navigasi Menu -->
+        <nav class="max-w-6xl mx-auto px-4 sm:px-6 py-2 overflow-x-auto flex gap-2 border-t border-slate-100/80 scrollbar-none">
+            <button class="nav-btn px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all shrink-0 flex items-center gap-2 bg-amber-400 text-amber-950 shadow-md scale-105" data-target="tab-materi">
+                <i data-lucide="book-open" class="w-4 h-4"></i>
+                <span>Materi & Konsep</span>
+            </button>
+            <button class="nav-btn px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all shrink-0 flex items-center gap-2 bg-white/80 text-slate-700 hover:bg-amber-100" data-target="tab-lab">
+                <i data-lucide="microscope" class="w-4 h-4"></i>
+                <span>Laboratorium Teks</span>
+            </button>
+            <button class="nav-btn px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all shrink-0 flex items-center gap-2 bg-white/80 text-slate-700 hover:bg-amber-100" data-target="tab-games">
+                <i data-lucide="gamepad-2" class="w-4 h-4"></i>
+                <span>Mini Games</span>
+            </button>
+            <button class="nav-btn px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all shrink-0 flex items-center gap-2 bg-white/80 text-slate-700 hover:bg-amber-100" data-target="tab-quiz">
+                <i data-lucide="help-circle" class="w-4 h-4"></i>
+                <span>Bank Soal & Kuis</span>
+            </button>
+            <button class="nav-btn px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all shrink-0 flex items-center gap-2 bg-white/80 text-slate-700 hover:bg-amber-100" data-target="tab-worksheet">
+                <i data-lucide="printer" class="w-4 h-4"></i>
+                <span>Lembar Kerja (Cetak)</span>
+            </button>
+        </nav>
+    </header>
+
+    <!-- Konten Utama Multi-Tab -->
+    <main class="flex-grow max-w-6xl w-full mx-auto p-4 sm:p-6">
+
+        <!-- ================= TAB 1: MATERI & KONSEP ================= -->
+        <section id="tab-materi" class="tab-panel space-y-8">
+            <!-- Hero Banner Modul -->
+            <div class="bg-gradient-to-r from-amber-400 via-amber-300 to-yellow-200 rounded-3xl p-6 sm:p-8 shadow-md border-4 border-white flex flex-col md:flex-row items-center justify-between gap-6 relative overflow-hidden">
+                <div class="space-y-3 z-10 max-w-xl">
+                    <span class="bg-amber-900 text-amber-100 font-extrabold text-xs px-3 py-1 rounded-full uppercase tracking-wider">
+                        Misi Detektif Membaca
+                    </span>
+                    <h2 class="text-2xl sm:text-4xl font-black text-amber-950 leading-tight">
+                        Ide Pokok & Memahami Isi Bacaan
+                    </h2>
+                    <p class="text-amber-900 font-medium text-sm sm:text-base leading-relaxed">
+                        Membaca dengan teliti membantu kita menemukan ide pokok dan memahami isi bacaan dengan baik! Ayo pelajari 8 rahasia detektif membaca di bawah ini!
+                    </p>
+                </div>
+                <div class="text-7xl sm:text-8xl shrink-0 animate-float">
+                    🕵️‍♂️📚
+                </div>
+            </div>
+
+            <!-- Akordeon 8 Modul Lengkap -->
+            <div>
+                <div class="flex items-center justify-between mb-4">
+                    <div>
+                        <h3 class="text-xl sm:text-2xl font-black text-slate-900">8 Konsep Penting</h3>
+                        <p class="text-slate-600 text-xs sm:text-sm">Klik pada modul untuk membuka rangkuman & trik cerdas</p>
+                    </div>
+                </div>
+                <div id="modules-container" class="space-y-3">
+                    <!-- Di-render dinamis oleh JavaScript -->
+                </div>
+            </div>
+
+            <!-- Flashcard 3D Cara Cepat Mengingat -->
+            <div class="pt-4">
+                <div class="bg-white rounded-3xl p-6 sm:p-8 border-2 border-amber-200 shadow-sm">
+                    <div class="text-center max-w-lg mx-auto mb-6">
+                        <span class="text-xs font-extrabold text-amber-600 uppercase tracking-wider bg-amber-100 px-3 py-1 rounded-full">
+                            Kartu Pintar Interaktif
+                        </span>
+                        <h3 class="text-2xl font-black text-slate-900 mt-1">Cara Cepat Mengingat</h3>
+                        <p class="text-slate-600 text-xs sm:text-sm">Klik kartu untuk membalikkan dan membaca intisari pentingnya!</p>
+                    </div>
+
+                    <div id="flashcards-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <!-- Di-render dinamis oleh JavaScript -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= TAB 2: LABORATORIUM TEKS ================= -->
+        <section id="tab-lab" class="tab-panel hidden space-y-6">
+            <!-- Header Lab -->
+            <div class="bg-white rounded-3xl p-6 sm:p-8 border-2 border-blue-200 shadow-sm">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b pb-4">
+                    <div>
+                        <span class="text-xs font-extrabold text-blue-600 uppercase tracking-wider bg-blue-100 px-3 py-1 rounded-full">
+                            Laboratorium Bedah Paragraf
+                        </span>
+                        <h2 class="text-2xl sm:text-3xl font-black text-slate-900 mt-1">
+                            Bedah Teks Nyata
+                        </h2>
+                        <p class="text-slate-600 text-xs sm:text-sm">
+                            Pilih salah satu teks di bawah untuk menguji kemampuan detektifmu menemukan kalimat utama dan ide pokok!
+                        </p>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button id="btn-lab-tts" class="bg-amber-100 hover:bg-amber-200 text-amber-800 font-bold px-4 py-2.5 rounded-xl text-xs sm:text-sm flex items-center gap-2 transition-all border border-amber-300 shadow-sm">
+                            <i data-lucide="volume-2" class="w-4 h-4"></i> Dengarkan Suara
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Tombol Pilihan 6 Teks -->
+                <div class="mt-4">
+                    <label class="text-xs font-bold text-slate-600 uppercase tracking-wide block mb-2">Pilih Cerita:</label>
+                    <div id="lab-text-selector" class="flex flex-wrap gap-2">
+                        <!-- Di-render oleh JavaScript -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Area Interaktif Teks yang Dipilih -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Kolom Kiri: Teks Bacaan & Highlighting -->
+                <div class="lg:col-span-2 bg-white rounded-3xl p-6 sm:p-8 border-2 border-slate-100 shadow-sm space-y-5">
+                    <div class="flex flex-wrap items-center justify-between gap-2 border-b pb-3">
+                        <div class="flex items-center gap-2">
+                            <h3 id="lab-title" class="font-black text-slate-900 text-lg sm:text-xl">Judul Teks</h3>
+                            <span id="lab-badge" class="text-xs font-bold px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-600">Badge</span>
+                        </div>
+                        <div class="text-xs text-slate-500 italic">
+                            Tip: Klik kalimat pada teks untuk menganalisisnya!
+                        </div>
+                    </div>
+
+                    <!-- Toolbar Sorot Warna -->
+                    <div class="flex flex-wrap items-center gap-2 text-xs">
+                        <span class="font-bold text-slate-600 mr-1">Sorot:</span>
+                        <button id="btn-highlight-utama" class="px-3 py-1.5 rounded-lg bg-amber-100 hover:bg-amber-200 text-amber-900 font-bold border border-amber-300 transition-colors flex items-center gap-1.5">
+                            <span class="w-3 h-3 rounded-full bg-amber-400 inline-block"></span>
+                            Kalimat Utama
+                        </button>
+                        <button id="btn-highlight-penjelas" class="px-3 py-1.5 rounded-lg bg-blue-100 hover:bg-blue-200 text-blue-900 font-bold border border-blue-300 transition-colors flex items-center gap-1.5">
+                            <span class="w-3 h-3 rounded-full bg-blue-400 inline-block"></span>
+                            Kalimat Penjelas
+                        </button>
+                        <button id="btn-highlight-all" class="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold transition-colors">
+                            Tampilkan Keduanya
+                        </button>
+                        <button id="btn-highlight-reset" class="px-3 py-1.5 rounded-lg text-slate-500 hover:text-slate-800 transition-colors">
+                            Bersihkan
+                        </button>
+                    </div>
+
+                    <!-- Wadah Paragraf Interaktif -->
+                    <div class="bg-slate-50 border-2 border-slate-200/80 rounded-2xl p-5 sm:p-6 min-h-[120px] shadow-inner">
+                        <div id="lab-sentences-wrapper" class="leading-relaxed">
+                            <!-- Di-render oleh JavaScript -->
+                        </div>
+                    </div>
+
+                    <!-- Bagian Khusus 5W1H (Muncul jika ada) -->
+                    <div id="lab-5w1h-section" class="hidden space-y-3 pt-2">
+                        <h4 class="font-bold text-purple-900 text-sm flex items-center gap-2">
+                            <i data-lucide="compass" class="w-4 h-4 text-purple-600"></i> Uji Pemahaman 5W1H (ADiKSiMBa):
+                        </h4>
+                        <div id="lab-5w1h-container" class="space-y-2">
+                            <!-- Di-render dinamis -->
+                        </div>
+                    </div>
+
+                    <!-- Bagian Khusus Informasi Penting / Ringkasan -->
+                    <div id="lab-extra-section" class="hidden pt-2">
+                        <div id="lab-extra-content"></div>
+                    </div>
+                </div>
+
+                <!-- Kolom Kanan: Catatan Analisis Detektif -->
+                <div class="bg-white rounded-3xl p-6 border-2 border-amber-200 shadow-sm flex flex-col justify-between space-y-4">
+                    <div class="space-y-4">
+                        <div class="flex items-center gap-2 border-b pb-2">
+                            <span class="text-2xl">🕵️‍♂️</span>
+                            <div>
+                                <h4 class="font-bold text-slate-900 text-base">Buku Catatan Detektif</h4>
+                                <p class="text-xs text-slate-500">Hasil analisis paragraf</p>
+                            </div>
+                        </div>
+
+                        <!-- Kotak Ide Pokok -->
+                        <div class="p-4 bg-amber-50 rounded-2xl border border-amber-200">
+                            <span class="text-xs font-bold uppercase text-amber-700 block mb-1">💡 Ide Pokok:</span>
+                            <p id="lab-ide-pokok" class="font-black text-amber-950 text-base leading-snug">
+                                -
+                            </p>
+                        </div>
+
+                        <!-- Kotak Kalimat Utama -->
+                        <div class="p-4 bg-blue-50 rounded-2xl border border-blue-200">
+                            <span class="text-xs font-bold uppercase text-blue-700 block mb-1">⭐ Letak Kalimat Utama:</span>
+                            <p id="lab-kalimat-utama" class="font-bold text-blue-950 text-sm leading-snug">
+                                -
+                            </p>
+                        </div>
+
+                        <!-- Kotak Mengapa Begitu? -->
+                        <div class="p-4 bg-emerald-50 rounded-2xl border border-emerald-200">
+                            <span class="text-xs font-bold uppercase text-emerald-700 block mb-1">❓ Mengapa begitu?</span>
+                            <p id="lab-mengapa" class="text-xs sm:text-sm text-emerald-950 leading-relaxed font-medium">
+                                -
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Slogan Pengingat -->
+                    <div class="p-3 bg-gradient-to-r from-amber-100 to-yellow-100 rounded-xl text-xs text-amber-900 font-semibold text-center border border-amber-300">
+                        "Jangan cari kalimat paling panjang, cari yang paling banyak dibahas!"
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= TAB 3: MINI GAMES ================= -->
+        <section id="tab-games" class="tab-panel hidden space-y-8">
+            <!-- Header Game -->
+            <div class="text-center max-w-2xl mx-auto">
+                <span class="text-xs font-extrabold text-emerald-600 uppercase tracking-wider bg-emerald-100 px-3 py-1 rounded-full">
+                    Gamifikasi Edukasi
+                </span>
+                <h2 class="text-2xl sm:text-4xl font-black text-slate-900 mt-2">
+                    Taman Bermain Detektif Cilik
+                </h2>
+                <p class="text-slate-600 text-xs sm:text-sm mt-1">
+                    Uji ketajaman intuisimu dengan bermain game seru pemilahan kalimat dan penghubung kata tanya!
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <!-- Game 1: Pilah Kalimat Utama vs Penjelas -->
+                <div class="bg-white rounded-3xl p-6 sm:p-8 border-2 border-emerald-200 shadow-sm flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between border-b pb-3 mb-4">
+                            <div>
+                                <span class="text-xs font-bold text-emerald-600 bg-emerald-100 px-2.5 py-0.5 rounded-full">Game 1</span>
+                                <h3 class="text-xl font-bold text-slate-900 mt-1">Pilah Kalimat</h3>
+                            </div>
+                            <div class="text-right">
+                                <span class="text-xs text-slate-500 block">Skor Kamu:</span>
+                                <span id="game-pilah-score" class="text-2xl font-black text-emerald-600">0</span>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center justify-between text-xs text-slate-500 mb-2">
+                            <span id="game-pilah-progress">Soal 1 dari 8</span>
+                            <span>Pilih jenis kalimat yang tepat</span>
+                        </div>
+
+                        <!-- Kartu Kalimat -->
+                        <div class="bg-gradient-to-br from-amber-50 to-orange-50 p-6 rounded-2xl border-2 border-amber-200 min-h-[140px] flex items-center justify-center mb-4 shadow-inner" id="game-pilah-sentence">
+                            <!-- Di-render oleh JavaScript -->
+                        </div>
+
+                        <!-- Feedback Box -->
+                        <div id="game-pilah-feedback" class="hidden mb-4"></div>
+                    </div>
+
+                    <div>
+                        <!-- Tombol Pilihan -->
+                        <div id="game-pilah-buttons" class="grid grid-cols-2 gap-3">
+                            <button id="game-btn-utama" class="p-3.5 bg-amber-400 hover:bg-amber-500 text-amber-950 font-bold rounded-xl shadow-md transition-transform active:scale-95 flex flex-col items-center">
+                                <span class="text-xl mb-1">⭐</span>
+                                <span>Kalimat Utama</span>
+                            </button>
+                            <button id="game-btn-penjelas" class="p-3.5 bg-blue-500 hover:bg-blue-600 text-white font-bold rounded-xl shadow-md transition-transform active:scale-95 flex flex-col items-center">
+                                <span class="text-xl mb-1">💬</span>
+                                <span>Kalimat Penjelas</span>
+                            </button>
+                        </div>
+
+                        <div id="game-pilah-restart-area" class="hidden text-center">
+                            <button id="game-btn-restart" class="px-6 py-3 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-xl shadow-md transition-all flex items-center gap-2 mx-auto">
+                                <i data-lucide="rotate-ccw" class="w-4 h-4"></i> Main Lagi
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Game 2: Pasangkan 5W1H (ADiKSiMBa) -->
+                <div class="bg-white rounded-3xl p-6 sm:p-8 border-2 border-purple-200 shadow-sm flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between border-b pb-3 mb-4">
+                            <div>
+                                <span class="text-xs font-bold text-purple-600 bg-purple-100 px-2.5 py-0.5 rounded-full">Game 2</span>
+                                <h3 class="text-xl font-bold text-slate-900 mt-1">Pasangkan ADiKSiMBa (5W1H)</h3>
+                            </div>
+                            <button id="btn-reset-5w1h" class="text-xs text-purple-600 hover:text-purple-800 font-bold flex items-center gap-1">
+                                <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i> Reset
+                            </button>
+                        </div>
+
+                        <p class="text-xs sm:text-sm text-slate-600 mb-4">
+                            <strong>Cara Main:</strong> Klik 1 kata tanya di sebelah kiri, lalu klik kotak penjelasan fungsi yang cocok di sebelah kanan!
+                        </p>
+
+                        <!-- Area Permainan Pasangkan -->
+                        <div class="grid grid-cols-2 gap-3 mb-4">
+                            <!-- Kolom Kata Tanya -->
+                            <div id="game-5w1h-words" class="space-y-2">
+                                <!-- Di-render oleh JavaScript -->
+                            </div>
+                            <!-- Kolom Target Arti -->
+                            <div id="game-5w1h-targets" class="space-y-2">
+                                <!-- Di-render oleh JavaScript -->
+                            </div>
+                        </div>
+
+                        <!-- Success Box -->
+                        <div id="game-5w1h-success" class="hidden p-4 bg-emerald-100 border border-emerald-300 rounded-xl text-center text-emerald-950">
+                            <span class="text-3xl block mb-1">🎉</span>
+                            <h4 class="font-bold text-lg">Luar Biasa! Semua Cocok!</h4>
+                            <p class="text-xs text-emerald-800">Kamu sudah menguasai seluruh rumus kata tanya 5W1H / ADiKSiMBa!</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= TAB 4: BANK SOAL & KUIS ================= -->
+        <section id="tab-quiz" class="tab-panel hidden space-y-6">
+            <!-- Header Tab Kuis -->
+            <div class="bg-white rounded-3xl p-6 sm:p-8 border-2 border-amber-200 shadow-sm flex flex-col md:flex-row items-center justify-between gap-4">
+                <div>
+                    <span class="text-xs font-extrabold text-amber-600 uppercase tracking-wider bg-amber-100 px-3 py-1 rounded-full">
+                        Evaluasi Belajar Interaktif
+                    </span>
+                    <h2 class="text-2xl sm:text-3xl font-black text-slate-900 mt-1">
+                        Bank Soal & Asesmen Mandiri
+                    </h2>
+                    <p class="text-slate-600 text-xs sm:text-sm">
+                        Tersedia 35 butir soal pilihan ganda lengkap dengan pembahasan mendalam dan tips detektif.
+                    </p>
+                </div>
+
+                <!-- Mode Switcher -->
+                <div class="flex items-center gap-1.5 p-1.5 bg-slate-100 rounded-2xl border border-slate-200">
+                    <button id="mode-practice-btn" class="px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all bg-amber-400 text-amber-950 shadow">
+                        Mode Latihan Mandiri
+                    </button>
+                    <button id="mode-exam-btn" class="px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all bg-white text-slate-600 hover:bg-slate-50">
+                        Mode Ujian Berwaktu ⏱️
+                    </button>
+                </div>
+            </div>
+
+            <!-- TAMPILAN 1: MODE LATIHAN MANDIRI -->
+            <div id="practice-quiz-view" class="space-y-6">
+                <!-- Filter Kategori Soal -->
+                <div class="flex flex-wrap items-center justify-between gap-3 bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+                    <div class="flex items-center gap-2 overflow-x-auto">
+                        <span class="text-xs font-bold text-slate-600 shrink-0">Kategori:</span>
+                        <button class="cat-filter-btn px-3 py-1.5 rounded-xl text-xs font-bold transition-all bg-amber-500 text-white shadow-sm shrink-0" data-category="ALL">
+                            Semua Soal
+                        </button>
+                        <button class="cat-filter-btn px-3 py-1.5 rounded-xl text-xs font-bold transition-all bg-slate-100 text-slate-700 hover:bg-slate-200 shrink-0" data-category="A">
+                            A. Paragraf & Ide Pokok
+                        </button>
+                        <button class="cat-filter-btn px-3 py-1.5 rounded-xl text-xs font-bold transition-all bg-slate-100 text-slate-700 hover:bg-slate-200 shrink-0" data-category="B">
+                            B. Kalimat Utama & Penjelas
+                        </button>
+                        <button class="cat-filter-btn px-3 py-1.5 rounded-xl text-xs font-bold transition-all bg-slate-100 text-slate-700 hover:bg-slate-200 shrink-0" data-category="C">
+                            C. Memahami Bacaan (5W1H)
+                        </button>
+                        <button class="cat-filter-btn px-3 py-1.5 rounded-xl text-xs font-bold transition-all bg-slate-100 text-slate-700 hover:bg-slate-200 shrink-0" data-category="D">
+                            D. Informasi Penting & Ringkasan
+                        </button>
+                    </div>
+                    <span id="practice-count-badge" class="text-xs font-bold px-2.5 py-1 rounded-lg bg-amber-100 text-amber-800 shrink-0">
+                        35 Soal
+                    </span>
+                </div>
+
+                <!-- Daftar Soal Mode Latihan -->
+                <div id="practice-questions-container" class="space-y-4">
+                    <!-- Di-render oleh JavaScript -->
+                </div>
+            </div>
+
+            <!-- TAMPILAN 2A: INTRO MODE UJIAN -->
+            <div id="exam-intro-view" class="hidden bg-white rounded-3xl p-8 border-2 border-amber-200 shadow-sm text-center max-w-xl mx-auto space-y-4">
+                <span class="text-6xl block mb-2">⏱️</span>
+                <h3 class="text-2xl font-black text-slate-900">Siap Ujian Detektif Membaca?</h3>
+                <p class="text-slate-600 text-sm leading-relaxed">
+                    Kamu akan mengerjakan <strong>15 butir soal acak</strong> dalam waktu <strong>15 menit</strong>. Jawaban benar dan skor akhir akan dihitung di akhir ujian.
+                </p>
+                <div class="bg-amber-50 p-4 rounded-2xl border border-amber-200 text-xs text-amber-900 text-left space-y-1.5">
+                    <p>✔ Bacalah stimulus teks dengan teliti.</p>
+                    <p>✔ Jangan terburu-buru, perhatikan kata tanya pada soal.</p>
+                    <p>✔ Setelah selesai, kamu akan mendapatkan bintang dan sertifikat predikat!</p>
+                </div>
+                <button id="btn-start-exam" class="w-full py-3.5 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-amber-950 font-black text-base rounded-2xl shadow-lg transition-transform active:scale-95">
+                    Mulai Ujian Sekarang 🚀
+                </button>
+            </div>
+
+            <!-- TAMPILAN 2B: MODE UJIAN AKTIF -->
+            <div id="exam-active-view" class="hidden space-y-4">
+                <!-- Bar Status Ujian -->
+                <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between gap-4">
+                    <div class="flex items-center gap-2">
+                        <span id="exam-q-num" class="font-bold text-slate-800 text-sm">Soal 1 dari 15</span>
+                        <span id="exam-q-cat" class="text-xs px-2.5 py-0.5 rounded-full bg-blue-100 text-blue-800 font-semibold hidden sm:inline-block">Kategori</span>
+                    </div>
+                    <!-- Timer -->
+                    <div class="flex items-center gap-2 bg-rose-50 border border-rose-200 px-3 py-1.5 rounded-xl text-rose-700 font-black text-sm">
+                        <i data-lucide="clock" class="w-4 h-4 text-rose-500"></i>
+                        <span id="exam-timer">15:00</span>
+                    </div>
+                </div>
+
+                <!-- Progress Bar -->
+                <div class="w-full bg-slate-200 rounded-full h-2.5 overflow-hidden">
+                    <div id="exam-progress-bar" class="bg-amber-400 h-2.5 rounded-full transition-all duration-300" style="width: 0%"></div>
+                </div>
+
+                <!-- Navigasi Nomor Soal -->
+                <div id="exam-nav-pills" class="flex flex-wrap gap-1.5 p-3 bg-white rounded-2xl border border-slate-200 shadow-sm">
+                    <!-- Di-render oleh JavaScript -->
+                </div>
+
+                <!-- Box Soal Ujian -->
+                <div class="bg-white rounded-3xl p-6 sm:p-8 border-2 border-slate-200 shadow-sm space-y-5">
+                    <div id="exam-q-passage" class="bg-amber-50 border-l-4 border-amber-400 p-4 rounded-r-xl text-sm text-slate-700 italic hidden">
+                        <!-- Teks Pengantar -->
+                    </div>
+
+                    <h3 id="exam-q-text" class="font-bold text-slate-900 text-lg sm:text-xl leading-relaxed">
+                        Pertanyaan Soal
+                    </h3>
+
+                    <div id="exam-q-options" class="space-y-2.5">
+                        <!-- Pilihan Opsi -->
+                    </div>
+
+                    <!-- Tombol Navigasi Ujian -->
+                    <div class="flex items-center justify-between pt-4 border-t border-slate-100">
+                        <button id="btn-exam-prev" class="px-5 py-2.5 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 font-bold text-sm transition-all disabled:opacity-40 disabled:cursor-not-allowed">
+                            ⬅ Sebelumnya
+                        </button>
+                        <button id="btn-exam-next" class="px-6 py-2.5 rounded-xl bg-amber-400 hover:bg-amber-500 text-amber-950 font-bold text-sm transition-all shadow-md">
+                            Berikutnya ➡
+                        </button>
+                        <button id="btn-exam-finish" class="hidden px-6 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-black text-sm transition-all shadow-md">
+                            Selesaikan Ujian 🏁
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAMPILAN 2C: HASIL UJIAN -->
+            <div id="exam-result-view" class="hidden space-y-6">
+                <div class="bg-white rounded-3xl p-6 sm:p-8 border-2 border-amber-200 shadow-md text-center max-w-xl mx-auto space-y-4">
+                    <span id="exam-stars" class="text-3xl block">⭐⭐⭐⭐⭐</span>
+                    <h3 id="exam-predikat-title" class="text-2xl font-black text-slate-900">
+                        Detektif Hebat!
+                    </h3>
+                    
+                    <div class="p-6 bg-gradient-to-br from-amber-50 to-orange-50 rounded-2xl border-2 border-amber-300 max-w-xs mx-auto">
+                        <span class="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">Skor Ujian Kamu:</span>
+                        <span id="exam-score-val" class="text-5xl font-black text-amber-600">100</span>
+                        <p id="exam-correct-count" class="text-xs text-slate-600 mt-1 font-semibold">15 dari 15 Soal Benar</p>
+                    </div>
+
+                    <p class="text-xs sm:text-sm text-slate-600">
+                        Kamu telah menyelesaikan ujian dengan baik! Tinjau lembar jawabanmu di bawah ini untuk melihat ulasan setiap soal.
+                    </p>
+
+                    <button id="btn-exam-retake" class="px-6 py-3 bg-amber-400 hover:bg-amber-500 text-amber-950 font-bold rounded-xl shadow-md transition-all">
+                        Ulangi Ujian 🔄
+                    </button>
+                </div>
+
+                <!-- Review Lembar Jawaban -->
+                <div class="bg-white rounded-3xl p-6 sm:p-8 border-2 border-slate-200 shadow-sm space-y-4">
+                    <h4 class="font-bold text-slate-900 text-lg border-b pb-3 flex items-center gap-2">
+                        <i data-lucide="check-square" class="w-5 h-5 text-emerald-600"></i> Evaluasi Setiap Soal Ujian:
+                    </h4>
+                    <div id="exam-review-container" class="space-y-3">
+                        <!-- Di-render oleh JavaScript -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= TAB 5: LEMBAR KERJA SISWA (WORKSHEET A4) ================= -->
+        <section id="tab-worksheet" class="tab-panel hidden space-y-6">
+            <!-- Header Aksi Cetak (Disembunyikan saat dicetak) -->
+            <div class="no-print bg-white rounded-3xl p-6 sm:p-8 border-2 border-slate-200 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div>
+                    <span class="text-xs font-extrabold text-blue-600 uppercase tracking-wider bg-blue-100 px-3 py-1 rounded-full">
+                        Fitur Siap Cetak (Printable)
+                    </span>
+                    <h2 class="text-2xl font-black text-slate-900 mt-1">
+                        Lembar Kerja Siswa (Worksheet)
+                    </h2>
+                    <p class="text-slate-600 text-xs sm:text-sm">
+                        Format rapi ukuran A4 untuk tugas kelas, PR, atau asesmen mandiri tertulis.
+                    </p>
+                </div>
+                <button id="btn-print-worksheet" class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-3 rounded-2xl shadow-md flex items-center gap-2 transition-transform active:scale-95 text-sm shrink-0">
+                    <i data-lucide="printer" class="w-5 h-5"></i> Cetak Lembar Kerja (PDF)
+                </button>
+            </div>
+
+            <!-- Kontainer Dokumen A4 Lembar Kerja -->
+            <div class="worksheet-container bg-white rounded-3xl p-8 sm:p-10 border-2 border-slate-300 shadow-lg max-w-4xl mx-auto">
+                <!-- Kop Lembar Kerja -->
+                <div class="border-b-2 border-black pb-4 mb-6">
+                    <div class="text-center mb-4">
+                        <h2 class="text-xl font-black uppercase tracking-wider text-black">LEMBAR KERJA SISWA (LKS)</h2>
+                        <h3 class="text-base font-bold text-slate-800">BAHASA INDONESIA KELAS 3 SD</h3>
+                        <p class="text-xs text-slate-600">Materi: Ide Pokok, Kalimat Utama & Memahami Isi Bacaan</p>
+                    </div>
+
+                    <!-- Kolom Identitas Siswa -->
+                    <div class="grid grid-cols-2 gap-4 text-xs sm:text-sm border p-3 rounded-lg border-slate-400">
+                        <div class="space-y-1.5">
+                            <p><strong>Nama Lengkap:</strong> ..............................................................</p>
+                            <p><strong>Nomor Absen:</strong> ..............................................................</p>
+                        </div>
+                        <div class="space-y-1.5">
+                            <p><strong>Kelas:</strong> 3 (Tiga) ...................................................</p>
+                            <p><strong>Hari / Tanggal:</strong> ..............................................................</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Petunjuk Pengerjaan -->
+                <div class="mb-6 p-3 bg-slate-50 border border-slate-300 rounded-lg text-xs text-slate-800">
+                    <strong>Petunjuk:</strong>
+                    <ol class="list-decimal list-inside space-y-0.5 mt-1">
+                        <li>Berdoalah sebelum mengerjakan soal.</li>
+                        <li>Bacalah setiap teks dan pertanyaan dengan cermat dan teliti.</li>
+                        <li>Silanglah (X) pada salah satu pilihan jawaban A, B, C, atau D yang paling tepat!</li>
+                    </ol>
+                </div>
+
+                <!-- Bagian 1: Soal Pilihan Ganda -->
+                <div class="mb-8">
+                    <h4 class="font-bold text-sm uppercase tracking-wide border-b pb-1 mb-4 text-black">
+                        I. Pilihan Ganda
+                    </h4>
+                    <div id="worksheet-questions-list">
+                        <!-- Di-render oleh JavaScript -->
+                    </div>
+                </div>
+
+                <!-- Bagian 2: Soal Uraian / Analisis Teks -->
+                <div class="question-block pt-4 border-t-2 border-black">
+                    <h4 class="font-bold text-sm uppercase tracking-wide border-b pb-1 mb-4 text-black">
+                        II. Analisis Teks & Uraian
+                    </h4>
+
+                    <div class="p-4 border border-slate-300 rounded-lg mb-4 bg-slate-50 text-xs sm:text-sm italic leading-relaxed">
+                        "Setiap pagi, Rani selalu merapikan tempat tidurnya. Ia kemudian membuka jendela agar udara segar masuk ke kamar. Setelah itu, Rani menyapu lantai dan menata buku-bukunya dengan rapi. Kamar Rani menjadi bersih dan nyaman."
+                    </div>
+
+                    <div class="space-y-4 text-xs sm:text-sm">
+                        <div>
+                            <p class="font-bold mb-1">1. Tuliskan ide pokok dari paragraf tentang Rani di atas!</p>
+                            <p class="text-slate-400 border-b border-dotted border-slate-400 py-1">Jawab: .................................................................................................................................................................................</p>
+                        </div>
+                        <div>
+                            <p class="font-bold mb-1">2. Mengapa Rani membuka jendela kamar tidurnya setiap pagi?</p>
+                            <p class="text-slate-400 border-b border-dotted border-slate-400 py-1">Jawab: .................................................................................................................................................................................</p>
+                        </div>
+                        <div>
+                            <p class="font-bold mb-1">3. Sebutkan 2 kalimat penjelas yang ada pada teks bacaan di atas!</p>
+                            <p class="text-slate-400 border-b border-dotted border-slate-400 py-1">a) .....................................................................................................................................................................................</p>
+                            <p class="text-slate-400 border-b border-dotted border-slate-400 py-1">b) .....................................................................................................................................................................................</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Kotak Nilai & Paraf Guru -->
+                <div class="mt-10 pt-6 border-t border-slate-300 grid grid-cols-3 gap-4 text-center text-xs">
+                    <div class="border border-slate-400 p-2 rounded">
+                        <p class="font-bold mb-8">Nilai</p>
+                    </div>
+                    <div class="border border-slate-400 p-2 rounded">
+                        <p class="font-bold mb-8">Paraf Orang Tua</p>
+                    </div>
+                    <div class="border border-slate-400 p-2 rounded">
+                        <p class="font-bold mb-8">Paraf Guru</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer Aplikasi -->
+    <footer class="no-print mt-12 bg-white border-t border-slate-200 py-6 text-center text-xs text-slate-500">
+        <p class="font-bold text-slate-700">Materi Interaktif Bahasa Indonesia Kelas 3 SD</p>
+        <p class="mt-1">Dibuat dengan penuh semangat belajar untuk calon detektif cilik Indonesia 🌟</p>
+    </footer>
+
+    <!-- Script Aplikasi -->
+    <script src="js/audio.js"></script>
+    <script src="js/data.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
