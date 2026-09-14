@@ -3,6 +3,12 @@
 
 Aplikasi web interaktif, animatif, dan edukatif yang dirancang khusus untuk memfasilitasi pembelajaran materi Bahasa Indonesia Kelas 3 SD sesuai materi kurikulum: **Ide Pokok, Kalimat Utama, Kalimat Penjelas, dan Memahami Isi Bacaan (5W1H / ADiKSiMBa)**.
 
+🌐 **Akses Web App Langsung (Live Demo)**:  
+👉 **[https://ats-bin.vercel.app](https://ats-bin.vercel.app)**  
+
+🐙 **Repositori GitHub**:  
+👉 **[https://github.com/Satsetx4/ats-bin](https://github.com/Satsetx4/ats-bin)**  
+
 ---
 
 ## 🌟 Fitur Unggulan Aplikasi
