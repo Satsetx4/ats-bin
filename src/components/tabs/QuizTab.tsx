@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { containerVariants, itemVariants, tapScale } from '@/lib/motion';
 import { questionBankData, type QuestionItem } from '@/data/learningData';
 import { sound } from '@/lib/audio';
+import { safeStorage } from '@/lib/storage';
 import confetti from 'canvas-confetti';
 import {
   Clock,
@@ -10,7 +11,15 @@ import {
   RotateCcw,
   ArrowLeft,
   ArrowRight,
-  Flag
+  Flag,
+  Volume2,
+  VolumeX,
+  Printer,
+  Award,
+  UserCheck,
+  Sparkles,
+  CheckCircle2,
+  XCircle
 } from 'lucide-react';
 
 interface QuizTabProps {
@@ -28,6 +37,14 @@ export const QuizTab: React.FC<QuizTabProps> = ({ onShowModal }) => {
   const [quizMode, setQuizMode] = useState<'latihan' | 'ujian'>('latihan');
   const [activeCategory, setActiveCategory] = useState<'ALL' | 'A' | 'B' | 'C' | 'D'>('ALL');
   
+  // Student identity state with safe localStorage persistence
+  const [studentName, setStudentName] = useState<string>(() => safeStorage.get<string>('ats_student_name', ''));
+  const [studentClass, setStudentClass] = useState<string>(() => safeStorage.get<string>('ats_student_class', 'Kelas 3'));
+  const [studentSchool, setStudentSchool] = useState<string>(() => safeStorage.get<string>('ats_student_school', ''));
+
+  // TTS audio state for questions
+  const [speakingQuestionId, setSpeakingQuestionId] = useState<number | null>(null);
+
   // Practice state
   const [practiceAnswers, setPracticeAnswers] = useState<Record<number, number>>({});
 
@@ -39,10 +56,11 @@ export const QuizTab: React.FC<QuizTabProps> = ({ onShowModal }) => {
   const [examTimeLeft, setExamTimeLeft] = useState<number>(15 * 60); // 15 menit
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Clear timer on unmount
+  // Clear timer & stop speech on unmount
   useEffect(() => {
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
+      sound.stopSpeech();
     };
   }, []);
 
@@ -67,9 +85,53 @@ export const QuizTab: React.FC<QuizTabProps> = ({ onShowModal }) => {
     };
   }, [examStatus]);
 
-  // Start exam mode
+  // Handle Question TTS Audio
+  const handleToggleQuestionTts = (q: QuestionItem) => {
+    sound.playTap();
+    if (speakingQuestionId === q.id) {
+      sound.stopSpeech();
+      setSpeakingQuestionId(null);
+    } else {
+      sound.stopSpeech();
+      setSpeakingQuestionId(q.id);
+      const textToRead = [
+        q.passage ? `Bacalah teks berikut: ${q.passage}.` : '',
+        `Pertanyaan: ${q.question}.`,
+        `Pilihan A: ${q.options[0]}.`,
+        `Pilihan B: ${q.options[1]}.`,
+        `Pilihan C: ${q.options[2]}.`,
+        `Pilihan D: ${q.options[3]}.`
+      ].filter(Boolean).join(' ');
+
+      sound.speakText(
+        textToRead,
+        () => setSpeakingQuestionId(q.id),
+        () => setSpeakingQuestionId(null)
+      );
+    }
+  };
+
+  // Start exam mode with name validation
   const startExam = () => {
+    if (!studentName.trim()) {
+      sound.playWrong();
+      onShowModal(
+        'Tuliskan Namamu Dulu Ya!',
+        'Halo Detektif Cilik! Silakan masukkan nama lengkapmu pada formulir di bawah agar namamu otomatis tercetak di Sertifikat Penghargaan Detektif! 🔍✨',
+        'alert'
+      );
+      return;
+    }
+
+    // Save student profile
+    safeStorage.set('ats_student_name', studentName.trim());
+    safeStorage.set('ats_student_class', studentClass.trim());
+    safeStorage.set('ats_student_school', studentSchool.trim());
+
+    sound.stopSpeech();
+    setSpeakingQuestionId(null);
     sound.playSuccess();
+
     const shuffled = [...questionBankData].sort(() => Math.random() - 0.5);
     const selected = shuffled.slice(0, 15);
     setExamQuestions(selected);
@@ -93,7 +155,7 @@ export const QuizTab: React.FC<QuizTabProps> = ({ onShowModal }) => {
     sound.playTap();
     onShowModal(
       'Selesaikan Ujian Sekarang?',
-      'Apakah kamu sudah yakin dengan semua jawabanmu dan ingin melihat hasil penilaian nilai akhir? 🏁',
+      'Apakah kamu sudah yakin dengan semua jawabanmu dan ingin melihat sertifikat nilai akhir? 🏁',
       'confirm',
       'Ya, Selesaikan!',
       'Periksa Lagi',
@@ -103,19 +165,20 @@ export const QuizTab: React.FC<QuizTabProps> = ({ onShowModal }) => {
 
   const finishExam = () => {
     if (timerRef.current) clearInterval(timerRef.current);
+    sound.stopSpeech();
+    setSpeakingQuestionId(null);
     sound.playFanfare();
-    confetti({ particleCount: 120, spread: 80, origin: { y: 0.5 } });
+    confetti({ particleCount: 140, spread: 90, origin: { y: 0.45 } });
     setExamStatus('result');
 
-    // CRITICAL BUG FIX: Scroll to top smoothly so result card is NEVER covered by header
     setTimeout(() => {
       window.scrollTo({ top: 0, behavior: 'smooth' });
-    }, 50);
+    }, 60);
   };
 
   // Practice answer selection
   const handlePracticeOption = (qid: number, optIdx: number, correctAns: number) => {
-    if (practiceAnswers[qid] !== undefined) return; // already answered
+    if (practiceAnswers[qid] !== undefined) return;
     if (optIdx === correctAns) {
       sound.playSuccess();
     } else {
@@ -151,21 +214,28 @@ export const QuizTab: React.FC<QuizTabProps> = ({ onShowModal }) => {
   }
   const examScore = examQuestions.length > 0 ? Math.round((correctExamCount / examQuestions.length) * 100) : 0;
 
-  let examPredikat = 'Detektif Baik! Terus Berlatih!';
+  let examPredikat = 'Detektif Muda Berbakat';
   let examStars = '⭐⭐⭐';
   if (examScore === 100) {
-    examPredikat = 'Detektif Master Bintang Emas! Sempurna!';
+    examPredikat = 'Detektif Master Bintang Emas (Sempurna)';
     examStars = '⭐⭐⭐⭐⭐';
   } else if (examScore >= 80) {
-    examPredikat = 'Detektif Handal! Sangat Cerdas!';
+    examPredikat = 'Detektif Handal (Sangat Cerdas)';
     examStars = '⭐⭐⭐⭐';
   } else if (examScore >= 65) {
-    examPredikat = 'Detektif Baik! Terus Berlatih!';
+    examPredikat = 'Detektif Muda Berbakat (Bagus)';
     examStars = '⭐⭐⭐';
   } else {
-    examPredikat = 'Tetap Semangat! Baca Lagi Materinya Ya!';
+    examPredikat = 'Calon Detektif Cilik (Terus Berlatih)';
     examStars = '⭐⭐';
   }
+
+  // Indonesian current date for certificate
+  const todayDateStr = new Intl.DateTimeFormat('id-ID', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric'
+  }).format(new Date());
 
   const currentExamQ = examQuestions[examCurrentIndex];
 
@@ -176,10 +246,10 @@ export const QuizTab: React.FC<QuizTabProps> = ({ onShowModal }) => {
       animate="visible"
       className="space-y-6"
     >
-      {/* Header Tab Kuis & Switcher Mode */}
+      {/* Header Tab Kuis & Switcher Mode (Disembunyikan saat Cetak) */}
       <motion.div
         variants={itemVariants}
-        className="bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-8 border-2 border-amber-200 dark:border-slate-800 shadow-sm flex flex-col md:flex-row items-center justify-between gap-4"
+        className="no-print bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-8 border-2 border-amber-200 dark:border-slate-800 shadow-sm flex flex-col md:flex-row items-center justify-between gap-4"
       >
         <div className="text-left">
           <span className="text-xs font-extrabold text-amber-600 dark:text-amber-400 uppercase tracking-wider bg-amber-100 dark:bg-amber-950/60 px-3 py-1 rounded-full inline-block">
@@ -189,7 +259,7 @@ export const QuizTab: React.FC<QuizTabProps> = ({ onShowModal }) => {
             Bank Soal & Asesmen Mandiri
           </h2>
           <p className="text-slate-600 dark:text-slate-400 text-xs sm:text-sm mt-1">
-            Tersedia 35 butir soal pilihan ganda lengkap dengan pembahasan mendalam dan tips detektif.
+            Tersedia 35 butir soal pilihan ganda, fitur suara TTS, sertifikat kelulusan digital, dan pembahasan lengkap.
           </p>
         </div>
 
@@ -199,6 +269,8 @@ export const QuizTab: React.FC<QuizTabProps> = ({ onShowModal }) => {
             whileTap={tapScale}
             onClick={() => {
               sound.playTap();
+              sound.stopSpeech();
+              setSpeakingQuestionId(null);
               setQuizMode('latihan');
               setExamStatus('intro');
             }}
@@ -214,6 +286,8 @@ export const QuizTab: React.FC<QuizTabProps> = ({ onShowModal }) => {
             whileTap={tapScale}
             onClick={() => {
               sound.playTap();
+              sound.stopSpeech();
+              setSpeakingQuestionId(null);
               setQuizMode('ujian');
               setExamStatus('intro');
             }}
@@ -249,6 +323,8 @@ export const QuizTab: React.FC<QuizTabProps> = ({ onShowModal }) => {
                   whileTap={tapScale}
                   onClick={() => {
                     sound.playTap();
+                    sound.stopSpeech();
+                    setSpeakingQuestionId(null);
                     setActiveCategory(cat.id as typeof activeCategory);
                   }}
                   className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all shrink-0 ${
@@ -273,6 +349,7 @@ export const QuizTab: React.FC<QuizTabProps> = ({ onShowModal }) => {
               const userAnswer = practiceAnswers[q.id];
               const isAnswered = userAnswer !== undefined;
               const isCorrect = isAnswered && userAnswer === q.correctAnswer;
+              const isThisSpeaking = speakingQuestionId === q.id;
 
               return (
                 <div
@@ -280,11 +357,38 @@ export const QuizTab: React.FC<QuizTabProps> = ({ onShowModal }) => {
                   className="bg-white dark:bg-slate-900 rounded-2xl border-2 border-slate-100 dark:border-slate-800 shadow-sm p-5 sm:p-6 text-left"
                 >
                   <div className="flex items-center justify-between gap-2 mb-3">
-                    <span className="text-xs font-bold px-3 py-1 rounded-full bg-blue-100 dark:bg-blue-950/60 text-blue-800 dark:text-blue-300">
-                      Soal #{q.id} • {q.categoryName}
-                    </span>
-                    <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">
-                      {isAnswered ? 'Sudah Dijawab' : 'Klik pilihan untuk melihat pembahasan'}
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-bold px-3 py-1 rounded-full bg-blue-100 dark:bg-blue-950/60 text-blue-800 dark:text-blue-300">
+                        Soal #{q.id} • {q.categoryName}
+                      </span>
+
+                      {/* TTS Question Audio Button */}
+                      <motion.button
+                        whileTap={tapScale}
+                        onClick={() => handleToggleQuestionTts(q)}
+                        className={`px-2.5 py-1 rounded-full text-xs font-bold flex items-center gap-1.5 transition-all ${
+                          isThisSpeaking
+                            ? 'bg-rose-500 text-white animate-pulse'
+                            : 'bg-amber-100 dark:bg-amber-950/70 hover:bg-amber-200 dark:hover:bg-amber-900 text-amber-800 dark:text-amber-200'
+                        }`}
+                        title={isThisSpeaking ? 'Hentikan Suara' : 'Dengarkan Soal (TTS)'}
+                      >
+                        {isThisSpeaking ? (
+                          <>
+                            <VolumeX className="w-3.5 h-3.5" />
+                            <span>Hentikan Suara</span>
+                          </>
+                        ) : (
+                          <>
+                            <Volume2 className="w-3.5 h-3.5" />
+                            <span>Dengarkan Soal</span>
+                          </>
+                        )}
+                      </motion.button>
+                    </div>
+
+                    <span className="text-xs text-slate-500 dark:text-slate-400 font-medium hidden sm:inline">
+                      {isAnswered ? 'Sudah Dijawab' : 'Pilih jawaban yang benar'}
                     </span>
                   </div>
 
@@ -381,43 +485,91 @@ export const QuizTab: React.FC<QuizTabProps> = ({ onShowModal }) => {
         </motion.div>
       )}
 
-      {/* ================= TAMPILAN 2: MODE UJIAN INTRO ================= */}
+      {/* ================= TAMPILAN 2: MODE UJIAN INTRO & FORM IDENTITAS SISWA ================= */}
       {quizMode === 'ujian' && examStatus === 'intro' && (
         <motion.div
           variants={itemVariants}
-          className="bg-white dark:bg-slate-900 rounded-3xl p-8 border-2 border-amber-200 dark:border-slate-800 shadow-sm text-center max-w-xl mx-auto space-y-5"
+          className="bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-8 border-2 border-amber-200 dark:border-slate-800 shadow-sm text-center max-w-xl mx-auto space-y-6"
         >
           <div className="w-16 h-16 rounded-2xl bg-amber-100 dark:bg-amber-950 text-amber-600 dark:text-amber-400 flex items-center justify-center mx-auto shadow-inner">
             <Clock className="w-8 h-8" />
           </div>
 
-          <h3 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white">
-            Siap Ujian Detektif Membaca?
-          </h3>
-
-          <p className="text-slate-600 dark:text-slate-300 text-sm leading-relaxed">
-            Kamu akan mengerjakan <strong>15 butir soal acak</strong> dalam batas waktu{' '}
-            <strong>15 menit</strong>. Jawaban benar dan skor akhir akan dievaluasi setelah ujian selesai.
-          </p>
-
-          <div className="bg-amber-50 dark:bg-amber-950/40 p-4 rounded-2xl border border-amber-200 dark:border-amber-800/60 text-xs sm:text-sm text-amber-950 dark:text-amber-200 text-left space-y-2">
-            <p className="flex items-start gap-2">
-              <span className="font-bold">✔</span> Bacalah stimulus teks dengan cermat dan teliti.
+          <div>
+            <h3 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white">
+              Ujian Detektif Membaca
+            </h3>
+            <p className="text-slate-600 dark:text-slate-300 text-sm mt-1">
+              Kerjakan <strong>15 butir soal acak</strong> dalam batas waktu <strong>15 menit</strong>.
             </p>
-            <p className="flex items-start gap-2">
-              <span className="font-bold">✔</span> Perhatikan kata tanya dan ide pokok paragraf.
+          </div>
+
+          {/* FORM IDENTITAS SISWA */}
+          <div className="bg-amber-50/80 dark:bg-amber-950/40 p-5 rounded-2xl border-2 border-amber-300 dark:border-amber-700/60 text-left space-y-3.5 shadow-inner">
+            <div className="flex items-center gap-2 text-amber-900 dark:text-amber-300 font-black text-sm">
+              <UserCheck className="w-5 h-5 text-amber-600 dark:text-amber-400" />
+              <span>Formulir Identitas Siswa (Untuk Sertifikat)</span>
+            </div>
+
+            <div className="space-y-3">
+              <div>
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                  Nama Lengkap Siswa: <span className="text-rose-500 font-black">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={studentName}
+                  onChange={e => setStudentName(e.target.value)}
+                  placeholder="Contoh: Budi Santoso / Aisyah Putri"
+                  className="w-full px-3.5 py-2.5 rounded-xl border-2 border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-semibold text-sm focus:border-amber-500 focus:outline-none transition-colors"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                    Kelas / Rombel:
+                  </label>
+                  <input
+                    type="text"
+                    value={studentClass}
+                    onChange={e => setStudentClass(e.target.value)}
+                    placeholder="Contoh: Kelas 3A / 3B"
+                    className="w-full px-3.5 py-2.5 rounded-xl border-2 border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-semibold text-sm focus:border-amber-500 focus:outline-none transition-colors"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                    Nama Sekolah (Opsional):
+                  </label>
+                  <input
+                    type="text"
+                    value={studentSchool}
+                    onChange={e => setStudentSchool(e.target.value)}
+                    placeholder="Contoh: SDN 1 Merdeka"
+                    className="w-full px-3.5 py-2.5 rounded-xl border-2 border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-semibold text-sm focus:border-amber-500 focus:outline-none transition-colors"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-slate-50 dark:bg-slate-800/60 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 text-xs text-slate-600 dark:text-slate-300 text-left space-y-1.5">
+            <p className="flex items-center gap-2">
+              <span className="font-bold text-amber-500">✔</span> Setiap soal dilengkapi tombol suara TTS untuk mendengarkan bacaan.
             </p>
-            <p className="flex items-start gap-2">
-              <span className="font-bold">✔</span> Di akhir ujian kamu akan mendapatkan bintang dan lembar pembahasan!
+            <p className="flex items-center gap-2">
+              <span className="font-bold text-amber-500">✔</span> Di akhir ujian, nama siswa akan otomatis tercetak di Sertifikat Kelulusan!
             </p>
           </div>
 
           <motion.button
             whileTap={tapScale}
             onClick={startExam}
-            className="w-full py-3.5 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-amber-950 font-black text-base rounded-2xl shadow-lg transition-transform"
+            className="w-full py-3.5 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-amber-950 font-black text-base rounded-2xl shadow-lg transition-transform flex items-center justify-center gap-2"
           >
-            Mulai Ujian Sekarang 🚀
+            <span>Mulai Ujian Sekarang</span>
+            <Sparkles className="w-5 h-5" />
           </motion.button>
         </motion.div>
       )}
@@ -434,18 +586,47 @@ export const QuizTab: React.FC<QuizTabProps> = ({ onShowModal }) => {
               <span className="text-xs px-2.5 py-0.5 rounded-full bg-blue-100 dark:bg-blue-950 text-blue-800 dark:text-blue-300 font-semibold hidden sm:inline-block">
                 {currentExamQ.categoryName}
               </span>
+              <span className="text-xs font-bold text-slate-500 dark:text-slate-400 hidden md:inline-block">
+                • {studentName || 'Detektif Cilik'}
+              </span>
             </div>
 
-            {/* Timer Display */}
-            <div
-              className={`flex items-center gap-2 px-3 py-1.5 rounded-xl font-black text-sm border ${
-                examTimeLeft < 180
-                  ? 'bg-rose-100 dark:bg-rose-950 text-rose-700 dark:text-rose-300 border-rose-300 animate-pulse'
-                  : 'bg-rose-50 dark:bg-slate-800 text-rose-600 dark:text-rose-400 border-rose-200 dark:border-slate-700'
-              }`}
-            >
-              <Clock className="w-4 h-4 text-rose-500" />
-              <span>{formatTime(examTimeLeft)}</span>
+            <div className="flex items-center gap-2">
+              {/* TTS Button on Active Exam Question */}
+              <motion.button
+                whileTap={tapScale}
+                onClick={() => handleToggleQuestionTts(currentExamQ)}
+                className={`p-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all shadow-sm ${
+                  speakingQuestionId === currentExamQ.id
+                    ? 'bg-rose-500 text-white animate-pulse'
+                    : 'bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-200'
+                }`}
+                title={speakingQuestionId === currentExamQ.id ? 'Hentikan Suara' : 'Dengarkan Soal (TTS)'}
+              >
+                {speakingQuestionId === currentExamQ.id ? (
+                  <>
+                    <VolumeX className="w-4 h-4" />
+                    <span className="hidden sm:inline">Hentikan</span>
+                  </>
+                ) : (
+                  <>
+                    <Volume2 className="w-4 h-4" />
+                    <span className="hidden sm:inline">Dengarkan Soal</span>
+                  </>
+                )}
+              </motion.button>
+
+              {/* Timer Display */}
+              <div
+                className={`flex items-center gap-2 px-3 py-1.5 rounded-xl font-black text-sm border ${
+                  examTimeLeft < 180
+                    ? 'bg-rose-100 dark:bg-rose-950 text-rose-700 dark:text-rose-300 border-rose-300 animate-pulse'
+                    : 'bg-rose-50 dark:bg-slate-800 text-rose-600 dark:text-rose-400 border-rose-200 dark:border-slate-700'
+                }`}
+              >
+                <Clock className="w-4 h-4 text-rose-500" />
+                <span>{formatTime(examTimeLeft)}</span>
+              </div>
             </div>
           </div>
 
@@ -472,6 +653,8 @@ export const QuizTab: React.FC<QuizTabProps> = ({ onShowModal }) => {
                   key={idx}
                   onClick={() => {
                     sound.playTap();
+                    sound.stopSpeech();
+                    setSpeakingQuestionId(null);
                     setExamCurrentIndex(idx);
                   }}
                   className={`w-8 h-8 rounded-lg font-bold text-xs border transition-all ${
@@ -500,46 +683,49 @@ export const QuizTab: React.FC<QuizTabProps> = ({ onShowModal }) => {
               {currentExamQ.question}
             </h3>
 
-            {/* Pilihan Opsi */}
+            {/* Pilihan Jawaban */}
             <div className="space-y-2.5">
-              {currentExamQ.options.map((opt, idx) => {
-                const isSelected = examAnswers[examCurrentIndex] === idx;
+              {currentExamQ.options.map((opt, optIdx) => {
+                const isSelected = examAnswers[examCurrentIndex] === optIdx;
+
                 return (
                   <motion.button
-                    key={idx}
+                    key={optIdx}
                     whileTap={tapScale}
-                    onClick={() => handleSelectExamOption(idx)}
-                    className={`w-full p-4 rounded-xl border-2 text-left font-medium text-sm transition-all flex items-start gap-3 ${
+                    onClick={() => handleSelectExamOption(optIdx)}
+                    className={`w-full p-4 rounded-2xl border-2 text-left font-medium text-sm sm:text-base transition-all flex items-center gap-3 ${
                       isSelected
-                        ? 'bg-amber-100 dark:bg-amber-950/70 border-amber-500 text-amber-950 dark:text-amber-100 shadow-sm font-bold'
-                        : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700'
+                        ? 'border-amber-500 bg-amber-50 dark:bg-amber-950/40 text-amber-950 dark:text-amber-100 font-bold shadow-sm'
+                        : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700'
                     }`}
                   >
                     <span
-                      className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0 mt-0.5 ${
+                      className={`w-8 h-8 rounded-xl flex items-center justify-center text-sm font-black shrink-0 ${
                         isSelected
                           ? 'bg-amber-500 text-white'
                           : 'bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300'
                       }`}
                     >
-                      {String.fromCharCode(65 + idx)}
+                      {String.fromCharCode(65 + optIdx)}
                     </span>
-                    <span className="leading-relaxed">{opt}</span>
+                    <span className="leading-snug">{opt}</span>
                   </motion.button>
                 );
               })}
             </div>
 
-            {/* Tombol Navigasi Prev / Next / Selesai */}
+            {/* Navigasi Tombol Bawah */}
             <div className="flex items-center justify-between pt-4 border-t border-slate-100 dark:border-slate-800">
               <motion.button
                 whileTap={tapScale}
                 disabled={examCurrentIndex === 0}
                 onClick={() => {
                   sound.playTap();
+                  sound.stopSpeech();
+                  setSpeakingQuestionId(null);
                   setExamCurrentIndex(prev => Math.max(0, prev - 1));
                 }}
-                className="px-5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-sm transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1.5"
+                className="px-5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-bold text-sm disabled:opacity-30 disabled:cursor-not-allowed flex items-center gap-1.5"
               >
                 <ArrowLeft className="w-4 h-4" /> Sebelumnya
               </motion.button>
@@ -557,6 +743,8 @@ export const QuizTab: React.FC<QuizTabProps> = ({ onShowModal }) => {
                   whileTap={tapScale}
                   onClick={() => {
                     sound.playTap();
+                    sound.stopSpeech();
+                    setSpeakingQuestionId(null);
                     setExamCurrentIndex(prev => Math.min(examQuestions.length - 1, prev + 1));
                   }}
                   className="px-6 py-2.5 rounded-xl bg-amber-400 hover:bg-amber-500 text-amber-950 font-bold text-sm transition-all shadow-md flex items-center gap-1.5"
@@ -569,73 +757,163 @@ export const QuizTab: React.FC<QuizTabProps> = ({ onShowModal }) => {
         </motion.div>
       )}
 
-      {/* ================= TAMPILAN 4: HASIL UJIAN (NO OVERLAP BUG) ================= */}
+      {/* ================= TAMPILAN 4: HASIL UJIAN & SERTIFIKAT DIGITAL ================= */}
       {quizMode === 'ujian' && examStatus === 'result' && (
         <motion.div
           variants={itemVariants}
           className="space-y-6 pt-2"
         >
-          {/* Card Skor Ujian yang Bersih dan Terpusat */}
-          <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-8 border-2 border-amber-300 dark:border-amber-500/50 shadow-lg text-center max-w-xl mx-auto space-y-4">
-            <span className="text-3xl sm:text-4xl block">{examStars}</span>
-            <h3 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white">
-              {examPredikat}
-            </h3>
+          {/* SERTIFIKAT DIGITAL KELULUSAN RESMI */}
+          <div className="certificate-print-area bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-10 border-4 border-amber-400 dark:border-amber-500 shadow-xl text-center max-w-2xl mx-auto relative overflow-hidden">
+            {/* Ornate Corner Accents */}
+            <div className="absolute top-2 left-2 text-amber-400 text-xl font-black">✦</div>
+            <div className="absolute top-2 right-2 text-amber-400 text-xl font-black">✦</div>
+            <div className="absolute bottom-2 left-2 text-amber-400 text-xl font-black">✦</div>
+            <div className="absolute bottom-2 right-2 text-amber-400 text-xl font-black">✦</div>
 
-            <div className="p-6 bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-950/40 dark:to-slate-800 rounded-2xl border-2 border-amber-300 dark:border-amber-700 max-w-xs mx-auto shadow-inner">
-              <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block mb-1">
-                Skor Ujian Kamu:
-              </span>
-              <span className="text-5xl font-black text-amber-600 dark:text-amber-400">
-                {examScore}
-              </span>
-              <p className="text-xs text-slate-600 dark:text-slate-300 mt-1 font-semibold">
-                {correctExamCount} dari {examQuestions.length} Soal Benar
+            {/* Certificate Header */}
+            <div className="space-y-1 border-b-2 border-amber-200 dark:border-amber-900/60 pb-4">
+              <div className="inline-flex items-center gap-2 bg-gradient-to-r from-amber-500 to-amber-600 text-white font-black text-xs px-4 py-1 rounded-full uppercase tracking-widest shadow-sm">
+                <Award className="w-4 h-4" />
+                <span>Sertifikat Kelulusan Resmi</span>
+              </div>
+              <h3 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white uppercase tracking-wider pt-2">
+                Detektif Cilik Membaca
+              </h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider">
+                Bahasa Indonesia Kelas 3 SD • Materi Ide Pokok & Isi Bacaan
               </p>
             </div>
 
-            <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300">
-              Kamu telah menyelesaikan ujian dengan baik! Tinjau lembar jawabanmu di bawah ini untuk melihat evaluasi setiap soal.
+            {/* Certificate Recipient */}
+            <div className="py-6 space-y-2">
+              <p className="text-xs uppercase font-bold text-slate-500 dark:text-slate-400 tracking-wider">
+                Diberikan dengan bangga kepada:
+              </p>
+              <h2 className="text-2xl sm:text-4xl font-black text-amber-600 dark:text-amber-400 underline decoration-amber-300 decoration-wavy underline-offset-8">
+                {studentName || 'Detektif Hebat'}
+              </h2>
+              <div className="flex items-center justify-center gap-3 text-xs sm:text-sm font-bold text-slate-700 dark:text-slate-300 pt-1">
+                <span>{studentClass || 'Kelas 3'}</span>
+                {studentSchool && <span>• {studentSchool}</span>}
+              </div>
+            </div>
+
+            {/* Statement of Achievement */}
+            <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 max-w-md mx-auto leading-relaxed mb-5">
+              Telah berhasil menyelesaikan <strong>Ujian Sertifikasi Detektif Membaca</strong> dengan capaian kompetensi:
             </p>
+
+            {/* Score & Badge Box */}
+            <div className="p-5 bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-950/40 dark:to-slate-800 rounded-2xl border-2 border-amber-300 dark:border-amber-700 max-w-sm mx-auto shadow-inner mb-6">
+              <span className="text-2xl sm:text-3xl block mb-1">{examStars}</span>
+              <span className="text-4xl sm:text-5xl font-black text-amber-600 dark:text-amber-400 block leading-tight">
+                {examScore} <span className="text-xl sm:text-2xl font-bold text-slate-500">/ 100</span>
+              </span>
+              <span className="text-xs sm:text-sm font-black text-slate-800 dark:text-slate-200 block mt-1">
+                {examPredikat}
+              </span>
+              <span className="text-xs text-slate-500 dark:text-slate-400 block font-medium mt-0.5">
+                {correctExamCount} dari {examQuestions.length} Soal Dijawab Benar
+              </span>
+            </div>
+
+            {/* Certificate Footer Signature & Date */}
+            <div className="border-t-2 border-amber-200 dark:border-amber-900/60 pt-4 flex items-end justify-between text-left text-xs text-slate-600 dark:text-slate-400">
+              <div>
+                <span className="block font-bold text-slate-800 dark:text-slate-200">Tanggal Ujian:</span>
+                <span>{todayDateStr}</span>
+                <span className="block font-mono text-[10px] text-slate-400 mt-1">
+                  ID: ATS-{Date.now().toString().slice(-6)}
+                </span>
+              </div>
+
+              <div className="text-right">
+                <div className="w-20 h-10 border-b border-dashed border-amber-500 flex items-center justify-center mx-auto text-amber-500/70 font-script italic">
+                  ✓ Terverifikasi
+                </div>
+                <span className="block font-bold text-slate-800 dark:text-slate-200 mt-1">
+                  Dewan Penguji Detektif
+                </span>
+                <span className="text-[10px]">Kelas 3 SD Indonesia</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Action Buttons Below Certificate (Hidden on Print) */}
+          <div className="no-print flex flex-wrap items-center justify-center gap-3">
+            <motion.button
+              whileTap={tapScale}
+              onClick={() => {
+                sound.playTap();
+                window.print();
+              }}
+              className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-black rounded-2xl shadow-md transition-all flex items-center gap-2 text-sm"
+            >
+              <Printer className="w-4 h-4" />
+              <span>Cetak / Simpan Sertifikat (PDF)</span>
+            </motion.button>
 
             <motion.button
               whileTap={tapScale}
-              onClick={startExam}
-              className="px-6 py-3 bg-amber-400 hover:bg-amber-500 text-amber-950 font-black rounded-xl shadow-md transition-all inline-flex items-center gap-2"
+              onClick={() => {
+                sound.playTap();
+                setExamStatus('intro');
+              }}
+              className="px-6 py-3 bg-amber-400 hover:bg-amber-500 text-amber-950 font-black rounded-2xl shadow-md transition-all flex items-center gap-2 text-sm"
             >
-              <RotateCcw className="w-4 h-4" /> Ulangi Ujian
+              <RotateCcw className="w-4 h-4" />
+              <span>Ulangi Ujian</span>
             </motion.button>
           </div>
 
-          {/* Evaluasi Setiap Soal Ujian */}
-          <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-8 border-2 border-slate-200 dark:border-slate-800 shadow-sm space-y-4 text-left">
+          {/* Evaluasi Setiap Soal Ujian (Disembunyikan saat cetak sertifikat) */}
+          <div className="no-print bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-8 border-2 border-slate-200 dark:border-slate-800 shadow-sm space-y-4 text-left">
             <h4 className="font-bold text-slate-900 dark:text-white text-lg border-b border-slate-100 dark:border-slate-800 pb-3 flex items-center gap-2">
               <CheckSquare className="w-5 h-5 text-emerald-600" />
-              <span>Evaluasi Setiap Soal Ujian:</span>
+              <span>Evaluasi & Pembahasan Setiap Soal Ujian:</span>
             </h4>
 
             <div className="space-y-3">
               {examQuestions.map((q, idx) => {
                 const userAns = examAnswers[idx];
                 const isCorrect = userAns === q.correctAnswer;
+                const isThisSpeaking = speakingQuestionId === q.id;
 
                 return (
                   <div
                     key={idx}
-                    className={`p-4 rounded-xl border-2 text-left ${
+                    className={`p-4 rounded-2xl border-2 text-left ${
                       isCorrect
                         ? 'border-emerald-200 dark:border-emerald-800 bg-emerald-50/60 dark:bg-emerald-950/30'
                         : 'border-rose-200 dark:border-rose-800 bg-rose-50/60 dark:bg-rose-950/30'
                     }`}
                   >
                     <div className="flex items-center justify-between mb-2">
-                      <span
-                        className={`font-bold text-sm ${
-                          isCorrect ? 'text-emerald-800 dark:text-emerald-300' : 'text-rose-800 dark:text-rose-300'
-                        }`}
-                      >
-                        Soal #{idx + 1} ({isCorrect ? '✔ BENAR' : '❌ SALAH'})
-                      </span>
+                      <div className="flex items-center gap-2">
+                        <span
+                          className={`font-bold text-sm flex items-center gap-1.5 ${
+                            isCorrect ? 'text-emerald-800 dark:text-emerald-300' : 'text-rose-800 dark:text-rose-300'
+                          }`}
+                        >
+                          {isCorrect ? <CheckCircle2 className="w-4 h-4" /> : <XCircle className="w-4 h-4" />}
+                          Soal #{idx + 1} ({isCorrect ? 'BENAR' : 'SALAH'})
+                        </span>
+
+                        {/* Question TTS button */}
+                        <button
+                          onClick={() => handleToggleQuestionTts(q)}
+                          className={`p-1.5 rounded-lg text-xs font-bold flex items-center gap-1 transition-all ${
+                            isThisSpeaking
+                              ? 'bg-rose-500 text-white animate-pulse'
+                              : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700'
+                          }`}
+                          title={isThisSpeaking ? 'Hentikan Suara' : 'Dengarkan Soal'}
+                        >
+                          {isThisSpeaking ? <VolumeX className="w-3.5 h-3.5" /> : <Volume2 className="w-3.5 h-3.5" />}
+                        </button>
+                      </div>
+
                       <span className="text-xs px-2.5 py-0.5 rounded-full bg-white dark:bg-slate-800 font-semibold text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
                         {q.categoryName}
                       </span>

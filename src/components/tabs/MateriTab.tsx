@@ -3,11 +3,13 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { containerVariants, itemVariants } from '@/lib/motion';
 import { modulesData, flashcardsData } from '@/data/learningData';
 import { sound } from '@/lib/audio';
-import { ChevronDown, Sparkles, RotateCw, Search } from 'lucide-react';
+import { ChevronDown, Sparkles, RotateCw, Search, Volume2, VolumeX } from 'lucide-react';
 
 export const MateriTab: React.FC = () => {
   const [openModuleId, setOpenModuleId] = useState<number | null>(1);
   const [flippedCards, setFlippedCards] = useState<Record<string | number, boolean>>({});
+  const [speakingModuleId, setSpeakingModuleId] = useState<number | null>(null);
+  const [speakingCardId, setSpeakingCardId] = useState<string | number | null>(null);
 
   const toggleModule = (id: number) => {
     sound.playTap();
@@ -20,6 +22,44 @@ export const MateriTab: React.FC = () => {
       ...prev,
       [id]: !prev[id],
     }));
+  };
+
+  const handleModuleTts = (e: React.MouseEvent, m: (typeof modulesData)[0]) => {
+    e.stopPropagation();
+    sound.playTap();
+    if (speakingModuleId === m.id) {
+      sound.stopSpeech();
+      setSpeakingModuleId(null);
+    } else {
+      sound.stopSpeech();
+      setSpeakingCardId(null);
+      setSpeakingModuleId(m.id);
+      const cleanSummary = m.summary.replace(/<[^>]+>/g, '');
+      const textToSpeak = `Modul ${m.id}: ${m.title}. ${cleanSummary}`;
+      sound.speakText(
+        textToSpeak,
+        () => setSpeakingModuleId(m.id),
+        () => setSpeakingModuleId(null)
+      );
+    }
+  };
+
+  const handleFlashcardTts = (e: React.MouseEvent, fc: (typeof flashcardsData)[0]) => {
+    e.stopPropagation();
+    sound.playTap();
+    if (speakingCardId === fc.id) {
+      sound.stopSpeech();
+      setSpeakingCardId(null);
+    } else {
+      sound.stopSpeech();
+      setSpeakingModuleId(null);
+      setSpeakingCardId(fc.id);
+      sound.speakText(
+        `${fc.front}. Artinya: ${fc.back}`,
+        () => setSpeakingCardId(fc.id),
+        () => setSpeakingCardId(null)
+      );
+    }
   };
 
   return (
@@ -95,10 +135,26 @@ export const MateriTab: React.FC = () => {
                     </div>
                   </div>
 
-                  <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 dark:text-slate-400 shrink-0">
-                    <ChevronDown
-                      className={`w-5 h-5 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`}
-                    />
+                  <div className="flex items-center gap-2 shrink-0">
+                    <button
+                      type="button"
+                      onClick={(e) => handleModuleTts(e, m)}
+                      className={`p-2 rounded-xl text-xs font-bold flex items-center gap-1 transition-all ${
+                        speakingModuleId === m.id
+                          ? 'bg-rose-500 text-white animate-pulse'
+                          : 'bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-200 hover:bg-amber-200 dark:hover:bg-amber-900'
+                      }`}
+                      title={speakingModuleId === m.id ? 'Hentikan Suara' : 'Dengarkan Ringkasan'}
+                    >
+                      {speakingModuleId === m.id ? <VolumeX className="w-3.5 h-3.5" /> : <Volume2 className="w-3.5 h-3.5" />}
+                      <span className="hidden sm:inline text-[11px]">{speakingModuleId === m.id ? 'Stop' : 'Suara'}</span>
+                    </button>
+
+                    <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 dark:text-slate-400">
+                      <ChevronDown
+                        className={`w-5 h-5 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`}
+                      />
+                    </div>
                   </div>
                 </button>
 
@@ -180,9 +236,27 @@ export const MateriTab: React.FC = () => {
                         <span className="text-[11px] font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wide">
                           Arti & Penjelasan
                         </span>
-                        <span className="text-xs font-bold text-slate-500 dark:text-slate-400">
-                          {fc.front}
-                        </span>
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-xs font-bold text-slate-500 dark:text-slate-400">
+                            {fc.front}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={(e) => handleFlashcardTts(e, fc)}
+                            className={`p-1 rounded-md transition-all ${
+                              speakingCardId === fc.id
+                                ? 'bg-rose-500 text-white animate-pulse'
+                                : 'text-amber-600 dark:text-amber-400 hover:bg-amber-100 dark:hover:bg-slate-700'
+                            }`}
+                            title={speakingCardId === fc.id ? 'Hentikan Suara' : 'Dengarkan Arti'}
+                          >
+                            {speakingCardId === fc.id ? (
+                              <VolumeX className="w-3.5 h-3.5" />
+                            ) : (
+                              <Volume2 className="w-3.5 h-3.5" />
+                            )}
+                          </button>
+                        </div>
                       </div>
                       <p className="text-center text-sm sm:text-base text-slate-700 dark:text-slate-200 font-medium my-auto px-1 leading-snug">
                         {fc.back}

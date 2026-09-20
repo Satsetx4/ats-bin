@@ -179,6 +179,8 @@ class SoundEngine {
     }
   }
 
+  private speakingText: string | null = null;
+
   // Text-To-Speech (Membaca Teks Bahasa Indonesia Ramah Anak)
   public speakText(text: string, onStart?: () => void, onEnd?: () => void): void {
     if (this.muted || typeof window === 'undefined') {
@@ -191,12 +193,20 @@ class SoundEngine {
       return;
     }
 
+    // If already speaking the exact same text, stop it (toggle behavior)
+    if (this.speakingText === text && window.speechSynthesis.speaking) {
+      this.stopSpeech();
+      if (onEnd) onEnd();
+      return;
+    }
+
     window.speechSynthesis.cancel();
+    this.speakingText = text;
 
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = 'id-ID';
     utterance.rate = 0.92;
-    utterance.pitch = 1.08;
+    utterance.pitch = 1.06;
 
     const voices = window.speechSynthesis.getVoices();
     const idVoice = voices.find(v => v.lang.includes('id') || v.lang.includes('ID') || v.name.toLowerCase().includes('indonesia'));
@@ -204,18 +214,30 @@ class SoundEngine {
       utterance.voice = idVoice;
     }
 
-    if (onStart) utterance.onstart = onStart;
+    utterance.onstart = () => {
+      this.speakingText = text;
+      if (onStart) onStart();
+    };
+
     utterance.onend = () => {
+      this.speakingText = null;
       if (onEnd) onEnd();
     };
+
     utterance.onerror = () => {
+      this.speakingText = null;
       if (onEnd) onEnd();
     };
 
     window.speechSynthesis.speak(utterance);
   }
 
+  public getSpeakingText(): string | null {
+    return this.speakingText;
+  }
+
   public stopSpeech(): void {
+    this.speakingText = null;
     if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
       window.speechSynthesis.cancel();
     }
@@ -223,3 +245,4 @@ class SoundEngine {
 }
 
 export const sound = new SoundEngine();
+

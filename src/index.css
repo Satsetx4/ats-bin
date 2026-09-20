@@ -136,6 +136,15 @@
     border: none !important;
   }
 
+  .certificate-print-area {
+    max-width: 100% !important;
+    margin: 0 auto !important;
+    padding: 1.5rem !important;
+    box-shadow: none !important;
+    border: 4px double #d97706 !important;
+    page-break-inside: avoid;
+  }
+
   .page-break {
     page-break-after: always;
   }
@@ -145,3 +154,4 @@
     margin-bottom: 1.25rem;
   }
 }
+
