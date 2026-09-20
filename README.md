@@ -1,7 +1,7 @@
-# 🔍 Web App Pembelajaran Interaktif & Bank Soal: Detektif Cilik Membaca
+# 🔍 Web App Pembelajaran Interaktif: Detektif Cilik Membaca (v2.0)
 ### Bahasa Indonesia Kelas 3 SD — Ide Pokok dan Memahami Isi Bacaan
 
-Aplikasi web interaktif, animatif, dan edukatif yang dirancang khusus untuk memfasilitasi pembelajaran materi Bahasa Indonesia Kelas 3 SD sesuai materi kurikulum: **Ide Pokok, Kalimat Utama, Kalimat Penjelas, dan Memahami Isi Bacaan (5W1H / ADiKSiMBa)**.
+Aplikasi web interaktif, animatif, dan edukatif yang dirancang khusus untuk memfasilitasi pembelajaran materi Bahasa Indonesia Kelas 3 SD sesuai kurikulum: **Ide Pokok, Kalimat Utama, Kalimat Penjelas, dan Memahami Isi Bacaan (5W1H / ADiKSiMBa)**.
 
 🌐 **Akses Web App Langsung (Live Demo)**:  
 👉 **[https://ats-bin.vercel.app](https://ats-bin.vercel.app)**  
@@ -11,74 +11,88 @@ Aplikasi web interaktif, animatif, dan edukatif yang dirancang khusus untuk memf
 
 ---
 
+## 🚀 Golden Tech Stack
+Aplikasi dibangun menggunakan **Golden Stack modern**:
+- **Framework Core**: React 19 + TypeScript + Vite 6
+- **Styling & Theming**: Tailwind CSS v4 (CSS-first, `@import "tailwindcss";`, `@custom-variant dark`)
+- **Animasi & Interaktivitas Taktil**: Framer Motion (Natural Spring Physics `stiffness: 350, damping: 25`, reduced motion support)
+- **Ikonografi**: Lucide React
+- **Efek Suara**: Web Audio API (Sintesis frekuensi tanpa file MP3 eksternal, 0 latency, lazy initialized)
+- **Efek Selebrasi**: Canvas Confetti (Local NPM bundle)
+
+---
+
 ## 🌟 Fitur Unggulan Aplikasi
 
-### 1. 📖 Modul Belajar Animatif (8 Konsep Utama)
-- **Modul 1: Pengertian Paragraf**: Penjelasan konsep paragraf sebagai kumpulan kalimat dengan satu topik.
-- **Modul 2: Ide Pokok**: Letak ide pokok (awal, akhir, tersirat), 5 langkah menemukan ide pokok, dan pertanyaan bantuan emas: *"Paragraf ini membahas tentang apa?"*.
-- **Modul 3: Kalimat Utama**: Definisi, 3 sifat utama (gagasan utama, berdiri sendiri, dasar kalimat lainnya), serta contoh analisis.
-- **Modul 4: Kalimat Penjelas**: Fungsi penjelas beserta 5 jenisnya (contoh, alasan, keterangan, fakta, penjelasan lanjut).
-- **Modul 5: Memahami Isi Bacaan (5W1H / ADiKSiMBa)**: Eksplorasi 6 kata tanya (Apa, Siapa, Kapan, Di mana, Mengapa, Bagaimana).
-- **Modul 6: Menjawab Pertanyaan Berdasarkan Bacaan**: 5 aturan emas dan tips tidak asal menebak.
-- **Modul 7: Menentukan Informasi Penting**: 8 kategori penting (tokoh, tempat, waktu, kegiatan, kejadian, alasan, hasil, manfaat).
-- **Modul 8: Meringkas Isi Bacaan**: 5 langkah merangkum teks secara padat tanpa mengubah intisari.
-- **Flashcard 3D "Cara Cepat Mengingat"**: Kartu pintar bolak-balik 3D untuk 5 konsep kunci.
+### 1. 🌓 Tema Ganda: Mode Terang & Mode Gelap (Dark Mode)
+- **Base Dark Elegan**: Mengurangi kelelahan mata saat anak belajar di malam hari bersama orang tua.
+- **Light Mode Ceria**: Tampilan pastel hangat untuk belajar di siang hari.
+- **Anti-FOUC Script**: Preferensi tema dimuat sebelum paint pertama di `<head>` agar tidak ada kedipan layar.
+- **Persistensi Aman**: Disimpan di `localStorage` dengan defensive helper `try/catch`.
 
-### 2. 🔬 Laboratorium Bedah Teks (Interactive Reading Lab)
+### 2. 📱 Navigasi Mobile-First & Anti-Tersesat (Wayfinding)
+- **Persistent Bottom Navigation Bar**: 5 tab navigasi utama selalu berada di jangkauan jempol (min `44x44px`) pada layar smartphone:
+  1. 📖 **Materi**: Modul & Flashcards
+  2. 🔬 **Lab Teks**: Bedah Cerita Interaktif
+  3. 🎮 **Games**: Gamifikasi Edukasi
+  4. 📝 **Kuis**: Bank Soal & Ujian Berwaktu
+  5. 🖨️ **LKS**: Lembar Kerja Siswa A4 Siap Cetak
+- **Desktop Navigation**: Tab navigasi atas yang lega untuk laptop dan tablet.
+
+### 3. 📖 Modul Belajar & Flashcard Pintar 3D (6 Konsep Kunci)
+- **8 Modul Akordeon**: Penjelasan konsep paragraf, ide pokok, kalimat utama, kalimat penjelas, 5W1H (ADiKSiMBa), cara menjawab pertanyaan, menentukan informasi penting, dan teknik meringkas.
+- **6 Flashcard 3D Simetris (2 baris x 3 kolom)**:
+  1. *Ide Pokok* 💡
+  2. *Kalimat Utama* ⭐
+  3. *Kalimat Penjelas* 💬
+  4. *Isi Bacaan* 📖
+  5. *Ringkasan* 📝
+  6. *ADiKSiMBa (5W1H)* 🧭
+
+### 4. 🔬 Laboratorium Bedah Teks (Interactive Reading Lab)
 - **6 Cerita Praktik Nyata**:
-  1. *Kamar Rani yang Bersih dan Nyaman* (Menemukan Ide Pokok Tersirat)
+  1. *Kamar Rani yang Bersih dan Nyaman* (Ide Pokok Tersirat)
   2. *Manfaat Membaca Buku* (Kalimat Utama di Awal Paragraf)
   3. *Edo Bersepeda Bersama Ayah* (Menentukan Ide Pokok dari Paragraf)
   4. *Lina Membantu Ibu Membuat Kue* (Eksplorasi 5W1H Interaktif)
   5. *Dika Merawat Tanaman di Halaman* (Menentukan Informasi Penting)
   6. *Sinta & Kucingnya Mimi* (Membuat Ringkasan & Trik Berpikir)
-- **Highlight Interaktif**: Klik kalimat langsung pada teks atau gunakan tombol sorot (Emas untuk Kalimat Utama, Biru untuk Kalimat Penjelas).
-- **Detektor Bukti 5W1H**: Klik tombol "Lihat Bukti di Teks" pada daftar pertanyaan untuk otomatis menyorot jawaban di teks.
-- **Dengarkan Suara (Text-to-Speech)**: Fitur pelafalan bahasa Indonesia ramah anak dengan audio player visual.
+- **Highlight Interaktif Tanpa Spasi Ganda**: Sorot kalimat utama (emas), penjelas (biru), dan bukti (hijau).
+- **Text-to-Speech (TTS)**: Pelafalan ramah anak dengan kontrol Dengarkan / Berhenti Suara.
 
-### 3. 🎮 Taman Bermain Gamifikasi (Mini Games)
-- **Game 1: Pilah Kalimat**: Tantangan memilih apakah kalimat yang tampil adalah *Kalimat Utama* atau *Kalimat Penjelas*, dilengkapi skor dan penjelasan instan.
-- **Game 2: Pasangkan ADiKSiMBa**: Menghubungkan kata tanya 5W1H dengan fungsi informasinya yang tepat secara interaktif.
+### 5. 🎮 Taman Bermain Gamifikasi (Mini Games)
+- **Game 1: Pilah Kalimat**: Tantangan memilih kalimat utama vs kalimat penjelas dengan skor dan pembahasan instan.
+- **Game 2: Pasangkan ADiKSiMBa**: Menghubungkan kata tanya 5W1H dengan fungsinya. Menggunakan **DetectiveModal** kartun ramah anak (tanpa alert browser kaku).
 
-### 4. 📝 Bank Soal Komprehensif (35 Butir Soal)
-- **4 Kategori Kompetensi**:
-  - Kategori A: Paragraf & Ide Pokok (9 Soal)
-  - Kategori B: Kalimat Utama & Kalimat Penjelas (9 Soal)
-  - Kategori C: Memahami Bacaan & 5W1H (9 Soal)
-  - Kategori D: Informasi Penting & Ringkasan (8 Soal)
-- **2 Mode Evaluasi**:
-  - **Mode Latihan Mandiri**: Pembahasan lengkap, kunci jawaban, dan tips detektif muncul seketika setelah menjawab.
-  - **Mode Ujian Berwaktu ⏱️**: Mengerjakan 15 soal acak dalam batas waktu 15 menit, progress bar, skor akhir 0-100, bintang prestasi (⭐⭐⭐⭐⭐), review evaluasi jawaban, dan selebrasi konfeti.
+### 6. 📝 Bank Soal Komprehensif (35 Butir)
+- **Mode Latihan Mandiri**: Filter kategori A, B, C, D, pembahasan instan, dan tips detektif.
+- **Mode Ujian Berwaktu ⏱️**: 15 soal acak dalam 15 menit, progress bar, timer, skor 0-100, bintang prestasi (⭐⭐⭐⭐⭐), evaluasi jawaban, dan auto-scroll mulus ke kartu hasil ujian tanpa terpotong header.
 
-### 5. 🖨️ Lembar Kerja Siswa (Worksheet A4 Siap Cetak)
-- Desain tata letak siap cetak format kertas A4 ramah printer.
-- Dilengkapi Kop Judul resmi, formulir Nama Siswa, Kelas, Tanggal, No Absen, Soal Pilihan Ganda, Soal Uraian/Analisis Teks, serta Kotak Nilai dan Paraf Guru/Orang Tua.
+### 7. 🖨️ Lembar Kerja Siswa (Worksheet A4 Siap Cetak)
+- Desain siap cetak format A4 ramah printer dengan kop identitas, petunjuk doa, soal pilihan ganda, analisis uraian, serta kotak tanda tangan nilai dan paraf guru/orang tua.
 
 ---
 
-## 🎵 Sistem Efek Suara Web Audio API
-Aplikasi menggunakan **Web Audio API** berbasis sintesis gelombang frekuensi (tanpa memerlukan file MP3 eksternal sehingga 100% cepat, ringan, dan bekerja offline):
-- *Tap Sound*: Umpan balik klik lembut.
-- *Success Chime*: Melodi ceria arpeggio 4 nada saat jawaban benar.
-- *Wrong Sound*: Nada lembut penanda mencoba lagi.
-- *Card Flip Whoosh*: Efek suara membalik flashcard 3D.
-- *Fanfare Trumpet*: Musik kemenangan saat menyelesaikan ujian atau game.
-- *Mute Toggle*: Kontrol tombol untuk mematikan/menyalakan suara kapan saja.
+## 🛠️ Menjalankan Proyek Secara Lokal
+
+```bash
+# Clone repositori
+git clone https://github.com/Satsetx4/ats-bin.git
+cd ats-bin
+
+# Install dependensi
+npm install
+
+# Jalankan server pengembangan lokal
+npm run dev
+
+# Buat build produksi
+npm run build
+
+# Preview build produksi
+npm run preview
+```
 
 ---
 
-## 🚀 Cara Menjalankan Aplikasi
-
-Aplikasi ini adalah **Standalone Single Page Application (SPA)** murni:
-
-1. **Buka Langsung di Browser**:
-   - Buka file `index.html` dengan klik ganda (*double click*), atau drag ke browser seperti **Google Chrome**, **Microsoft Edge**, atau **Mozilla Firefox**.
-   - Path lokal:
-     ```
-     C:\Users\Sekawan\.gemini\antigravity\scratch\bahasa-indonesia-kelas3\index.html
-     ```
-
-2. **Dukungan Perangkat**:
-   - Laptop / PC Desktop (tampilan lega dengan grid interaktif).
-   - Tablet (iPad / Android Tablet — ramah layar sentuh untuk anak-anak).
-   - Smartphone (tampilan mobile responsif dengan navigasi nyaman).
+Dibuat dengan penuh semangat belajar untuk kemajuan pendidikan anak Indonesia! 🌟

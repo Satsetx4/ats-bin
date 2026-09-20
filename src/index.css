@@ -1,0 +1,147 @@
+@import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@layer base {
+  :root {
+    --font-heading: 'Fredoka', cursive, sans-serif;
+    --font-body: 'Plus Jakarta Sans', sans-serif;
+  }
+
+  body {
+    font-family: var(--font-body);
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  h1, h2, h3, h4, h5, h6, .font-heading {
+    font-family: var(--font-heading);
+    letter-spacing: 0.02em;
+  }
+}
+
+/* 3D Card Flip for Flashcards */
+.perspective-1000 {
+  perspective: 1000px;
+}
+
+.transform-style-3d {
+  transform-style: preserve-3d;
+}
+
+.backface-hidden {
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+.rotate-y-180 {
+  transform: rotateY(180deg);
+}
+
+/* Sentence Interactive in Lab */
+.sentence-interactive {
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border-radius: 0.5rem;
+  padding: 0.2rem 0.35rem;
+  display: inline;
+  line-height: 2.2rem;
+  margin-right: 0.2rem;
+}
+
+.sentence-interactive:hover {
+  filter: brightness(0.95);
+  outline: 2px dashed #38bdf8;
+}
+
+.dark .sentence-interactive:hover {
+  filter: brightness(1.2);
+  outline: 2px dashed #38bdf8;
+}
+
+.highlight-utama {
+  background-color: #fef08a !important;
+  border-bottom: 3px solid #eab308 !important;
+  color: #854d0e !important;
+  font-weight: 700 !important;
+}
+
+.dark .highlight-utama {
+  background-color: #854d0e !important;
+  border-bottom: 3px solid #facc15 !important;
+  color: #fef08a !important;
+}
+
+.highlight-penjelas {
+  background-color: #dbeafe !important;
+  border-bottom: 3px solid #3b82f6 !important;
+  color: #1e40af !important;
+  font-weight: 600 !important;
+}
+
+.dark .highlight-penjelas {
+  background-color: #1e3a8a !important;
+  border-bottom: 3px solid #60a5fa !important;
+  color: #dbeafe !important;
+}
+
+.highlight-5w1h {
+  background-color: #a7f3d0 !important;
+  border-bottom: 3px solid #10b981 !important;
+  color: #065f46 !important;
+  font-weight: 700 !important;
+}
+
+.dark .highlight-5w1h {
+  background-color: #064e3b !important;
+  border-bottom: 3px solid #34d399 !important;
+  color: #a7f3d0 !important;
+}
+
+/* Animations */
+@keyframes floatSlow {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-6px) rotate(1deg);
+  }
+}
+
+.animate-float {
+  animation: floatSlow 3.5s ease-in-out infinite;
+}
+
+/* A4 Worksheet Print Optimization */
+@media print {
+  body {
+    background: white !important;
+    color: black !important;
+    font-size: 11pt;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+
+  .print-only {
+    display: block !important;
+  }
+
+  .worksheet-container {
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+    border: none !important;
+  }
+
+  .page-break {
+    page-break-after: always;
+  }
+
+  .question-block {
+    page-break-inside: avoid;
+    margin-bottom: 1.25rem;
+  }
+}
