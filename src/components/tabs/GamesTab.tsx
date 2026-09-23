@@ -1,8 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { containerVariants, itemVariants, tapScale } from '@/lib/motion';
 import { miniGamesData, type GamePilahItem, type Game5W1HItem } from '@/data/learningData';
 import { sound } from '@/lib/audio';
+import { shuffle } from '@/lib/exam';
+import { useReducedMotion } from 'framer-motion';
+import { restoreGameProgress } from '@/lib/learningProgress';
+import { safeStorage, STORAGE_KEYS } from '@/lib/storage';
 import confetti from 'canvas-confetti';
 import { RotateCcw, Star, MessageSquare } from 'lucide-react';
 
@@ -11,35 +15,65 @@ interface GamesTabProps {
 }
 
 export const GamesTab: React.FC<GamesTabProps> = ({ onShowModal }) => {
+  const prefersReducedMotion = useReducedMotion();
+  const [initialProgress] = useState(() => restoreGameProgress(
+    safeStorage.get<unknown>(STORAGE_KEYS.gameProgress, null),
+    miniGamesData.pilahKalimat.length,
+    miniGamesData.pasangKataTanya,
+  ));
+  const targetByWord = new Map(miniGamesData.pasangKataTanya.map(item => [item.qWord, item]));
+
   // Game 1 State
-  const [pilahIndex, setPilahIndex] = useState<number>(0);
-  const [pilahScore, setPilahScore] = useState<number>(0);
+  const [pilahIndex, setPilahIndex] = useState<number>(initialProgress.pilahIndex);
+  const [pilahScore, setPilahScore] = useState<number>(initialProgress.pilahScore);
   const [pilahFeedback, setPilahFeedback] = useState<{ isCorrect: boolean; reason: string } | null>(null);
-  const [isPilahDone, setIsPilahDone] = useState<boolean>(false);
+  const [isPilahDone, setIsPilahDone] = useState<boolean>(initialProgress.isPilahDone);
+  const [pendingPilahAdvance, setPendingPilahAdvance] = useState(initialProgress.pendingPilahAdvance);
+  const pilahTransitionTimer = useRef<number | null>(null);
+  const wrongTargetTimer = useRef<number | null>(null);
 
   // Game 2 State
-  const [selectedWord, setSelectedWord] = useState<string | null>(null);
-  const [matchedPairs, setMatchedPairs] = useState<string[]>([]);
-  const [shuffledTargets, setShuffledTargets] = useState<Game5W1HItem[]>([]);
+  const [selectedWord, setSelectedWord] = useState<string | null>(initialProgress.selectedWord);
+  const [matchedPairs, setMatchedPairs] = useState<string[]>(initialProgress.matchedPairs);
+  const [shuffledTargets, setShuffledTargets] = useState<Game5W1HItem[]>(() => initialProgress.shuffledQuestionWords.flatMap(word => {
+    const item = targetByWord.get(word);
+    return item ? [item] : [];
+  }));
   const [wrongTargetWord, setWrongTargetWord] = useState<string | null>(null);
-  const [isGame2Done, setIsGame2Done] = useState<boolean>(false);
+  const [isGame2Done, setIsGame2Done] = useState<boolean>(initialProgress.isGame2Done);
 
-  // Init shuffled targets for Game 2
   useEffect(() => {
-    resetGame2();
+    safeStorage.set(STORAGE_KEYS.gameProgress, {
+      version: 1,
+      pilahIndex,
+      pilahScore,
+      isPilahDone,
+      pendingPilahAdvance,
+      selectedWord,
+      matchedPairs,
+      shuffledQuestionWords: shuffledTargets.map(item => item.qWord),
+      isGame2Done,
+    });
+  }, [isPilahDone, isGame2Done, matchedPairs, pendingPilahAdvance, pilahFeedback, pilahIndex, pilahScore, selectedWord, shuffledTargets]);
+
+  useEffect(() => () => {
+    if (pilahTransitionTimer.current !== null) window.clearTimeout(pilahTransitionTimer.current);
+    if (wrongTargetTimer.current !== null) window.clearTimeout(wrongTargetTimer.current);
   }, []);
 
   const resetGame2 = () => {
+    if (wrongTargetTimer.current !== null) window.clearTimeout(wrongTargetTimer.current);
+    wrongTargetTimer.current = null;
     setSelectedWord(null);
     setMatchedPairs([]);
     setIsGame2Done(false);
     setWrongTargetWord(null);
-    const shuffled = [...miniGamesData.pasangKataTanya].sort(() => Math.random() - 0.5);
+    const shuffled = shuffle(miniGamesData.pasangKataTanya);
     setShuffledTargets(shuffled);
   };
 
   const handlePilahAnswer = (type: 'utama' | 'penjelas') => {
-    if (pilahFeedback) return; // Prevent double click during feedback
+    if (pilahFeedback || isPilahDone) return; // Prevent double click during feedback
 
     const currentQ: GamePilahItem = miniGamesData.pilahKalimat[pilahIndex];
     const isCorrect = currentQ.type === type;
@@ -59,12 +93,15 @@ export const GamesTab: React.FC<GamesTabProps> = ({ onShowModal }) => {
       });
     }
 
-    setTimeout(() => {
+    setPendingPilahAdvance(true);
+    pilahTransitionTimer.current = window.setTimeout(() => {
+      pilahTransitionTimer.current = null;
+      setPendingPilahAdvance(false);
       setPilahFeedback(null);
       if (pilahIndex + 1 >= miniGamesData.pilahKalimat.length) {
         setIsPilahDone(true);
         sound.playFanfare();
-        confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+        if (!prefersReducedMotion) confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
       } else {
         setPilahIndex(prev => prev + 1);
       }
@@ -73,10 +110,13 @@ export const GamesTab: React.FC<GamesTabProps> = ({ onShowModal }) => {
 
   const resetGame1 = () => {
     sound.playTap();
+    if (pilahTransitionTimer.current !== null) window.clearTimeout(pilahTransitionTimer.current);
+    pilahTransitionTimer.current = null;
     setPilahIndex(0);
     setPilahScore(0);
     setPilahFeedback(null);
     setIsPilahDone(false);
+    setPendingPilahAdvance(false);
   };
 
   // Game 2 logic
@@ -110,13 +150,15 @@ export const GamesTab: React.FC<GamesTabProps> = ({ onShowModal }) => {
       if (updated.length === miniGamesData.pasangKataTanya.length) {
         setIsGame2Done(true);
         sound.playFanfare();
-        confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+        if (!prefersReducedMotion) confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
       }
     } else {
       // Wrong Match
       sound.playWrong();
       setWrongTargetWord(target.qWord);
-      setTimeout(() => {
+      if (wrongTargetTimer.current !== null) window.clearTimeout(wrongTargetTimer.current);
+      wrongTargetTimer.current = window.setTimeout(() => {
+        wrongTargetTimer.current = null;
         setWrongTargetWord(null);
       }, 700);
     }
@@ -163,7 +205,7 @@ export const GamesTab: React.FC<GamesTabProps> = ({ onShowModal }) => {
               <div className="text-right">
                 <span className="text-xs text-slate-500 dark:text-slate-400 block">Skor Kamu:</span>
                 <span className="text-2xl font-black text-emerald-600 dark:text-emerald-400">
-                  {pilahScore * 10}
+                  {pilahScore} / {miniGamesData.pilahKalimat.length}
                 </span>
               </div>
             </div>
@@ -175,9 +217,24 @@ export const GamesTab: React.FC<GamesTabProps> = ({ onShowModal }) => {
 
             {/* Area Kartu Kalimat */}
             {!isPilahDone ? (
-              <div className="bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-950/30 dark:to-slate-800/60 p-6 rounded-2xl border-2 border-amber-200 dark:border-amber-800/50 min-h-[140px] flex items-center justify-center mb-4 shadow-inner">
-                <p className="text-base sm:text-lg font-bold text-slate-800 dark:text-slate-100 leading-relaxed text-center">
-                  "{currentPilahQ?.sentence}"
+              <div className="bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-950/30 dark:to-slate-800/60 p-5 sm:p-6 rounded-2xl border-2 border-amber-200 dark:border-amber-800/50 min-h-[140px] mb-4 shadow-inner space-y-3">
+                {currentPilahQ?.context && (
+                  <div className="text-left">
+                    <span className="block text-[11px] uppercase tracking-wide font-extrabold text-amber-800 dark:text-amber-300 mb-1">
+                      Konteks paragraf
+                    </span>
+                    <p className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed">
+                      {(() => {
+                        const [before, ...after] = currentPilahQ.context.split(currentPilahQ.sentence);
+                        return after.length > 0 ? (
+                          <>{before}<mark className="rounded bg-amber-200 dark:bg-amber-700 px-0.5">{currentPilahQ.sentence}</mark>{after.join(currentPilahQ.sentence)}</>
+                        ) : currentPilahQ.context;
+                      })()}
+                    </p>
+                  </div>
+                )}
+                <p className="text-base sm:text-lg font-bold text-slate-900 dark:text-slate-100 leading-relaxed text-center">
+                  Kalimat yang dinilai: “{currentPilahQ?.sentence}”
                 </p>
               </div>
             ) : (
@@ -187,8 +244,8 @@ export const GamesTab: React.FC<GamesTabProps> = ({ onShowModal }) => {
                   Luar Biasa, Detektif Hebat!
                 </h4>
                 <p className="text-sm text-slate-700 dark:text-slate-300">
-                  Kamu berhasil memilah semua kalimat dengan skor akhir:{' '}
-                  <strong className="text-emerald-600 dark:text-emerald-400">{pilahScore * 10} poin</strong>!
+                  Kamu menjawab benar{' '}
+                  <strong className="text-emerald-600 dark:text-emerald-400">{pilahScore} dari {miniGamesData.pilahKalimat.length} kalimat</strong>.
                 </p>
               </div>
             )}
@@ -327,7 +384,7 @@ export const GamesTab: React.FC<GamesTabProps> = ({ onShowModal }) => {
                         isMatched
                           ? 'bg-emerald-100 dark:bg-emerald-950 text-emerald-950 dark:text-emerald-100 border-emerald-500 font-bold opacity-80'
                           : isWrong
-                          ? 'bg-rose-100 dark:bg-rose-950 border-rose-400 text-rose-900 dark:text-rose-200 animate-shake'
+                          ? 'bg-rose-100 dark:bg-rose-950 border-rose-400 text-rose-900 dark:text-rose-200'
                           : 'border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 text-slate-700 dark:text-slate-200 hover:bg-amber-50 dark:hover:bg-slate-700'
                       }`}
                     >

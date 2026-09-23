@@ -1,11 +1,49 @@
-import { safeStorage } from './storage';
+import { safeStorage, STORAGE_KEYS } from './storage';
+
+export type SpeechStatus = 'idle' | 'speaking' | 'muted';
+
+export interface SpeechSnapshot {
+  status: SpeechStatus;
+  key: string | null;
+  muted: boolean;
+}
 
 class SoundEngine {
   private ctx: AudioContext | null = null;
   public muted: boolean = false;
+  private speechRequestId = 0;
+  private speechListeners = new Set<() => void>();
+  private speechSnapshot: SpeechSnapshot = { status: 'idle', key: null, muted: false };
 
   constructor() {
-    this.muted = safeStorage.get<boolean>('ats_muted', false);
+    this.muted = safeStorage.get<boolean>(STORAGE_KEYS.muted, false);
+    this.speechSnapshot = {
+      status: this.muted ? 'muted' : 'idle',
+      key: null,
+      muted: this.muted,
+    };
+  }
+
+  public getSpeechSnapshot = (): SpeechSnapshot => this.speechSnapshot;
+
+  public subscribeSpeech = (listener: () => void): (() => void) => {
+    this.speechListeners.add(listener);
+    return () => this.speechListeners.delete(listener);
+  };
+
+  private publishSpeech(status: SpeechStatus, key: string | null = null): void {
+    const nextStatus = this.muted ? 'muted' : status;
+    const nextSnapshot: SpeechSnapshot = {
+      status: nextStatus,
+      key: nextStatus === 'speaking' ? key : null,
+      muted: this.muted,
+    };
+    if (this.speechSnapshot.status === nextSnapshot.status
+      && this.speechSnapshot.key === nextSnapshot.key
+      && this.speechSnapshot.muted === nextSnapshot.muted) return;
+
+    this.speechSnapshot = nextSnapshot;
+    this.speechListeners.forEach(listener => listener());
   }
 
   // Lazy AudioContext initialization only after user gesture
@@ -32,12 +70,19 @@ class SoundEngine {
   }
 
   public toggleMute(): boolean {
-    this.muted = !this.muted;
-    safeStorage.set('ats_muted', this.muted);
-    if (this.muted) {
-      this.stopSpeech();
-    }
+    this.setMuted(!this.muted);
     return this.muted;
+  }
+
+  public setMuted(muted: boolean): void {
+    if (this.muted === muted && this.speechSnapshot.muted === muted) return;
+    this.muted = muted;
+    safeStorage.set(STORAGE_KEYS.muted, muted);
+    if (muted) {
+      this.stopSpeech();
+    } else {
+      this.publishSpeech('idle');
+    }
   }
 
   public playTap(): void {
@@ -182,54 +227,51 @@ class SoundEngine {
   private speakingText: string | null = null;
 
   // Text-To-Speech (Membaca Teks Bahasa Indonesia Ramah Anak)
-  public speakText(text: string, onStart?: () => void, onEnd?: () => void): void {
-    if (this.muted || typeof window === 'undefined') {
-      if (onEnd) onEnd();
+  public speakText(text: string, key: string): void {
+    if (this.muted) {
+      this.publishSpeech('muted');
       return;
     }
 
-    if (!('speechSynthesis' in window)) {
-      if (onEnd) onEnd();
+    if (typeof window === 'undefined' || !('speechSynthesis' in window)) {
+      this.publishSpeech('idle');
       return;
     }
 
-    // If already speaking the exact same text, stop it (toggle behavior)
-    if (this.speakingText === text && window.speechSynthesis.speaking) {
-      this.stopSpeech();
-      if (onEnd) onEnd();
-      return;
-    }
-
-    window.speechSynthesis.cancel();
+    this.stopSpeech();
+    const requestId = this.speechRequestId;
     this.speakingText = text;
+    this.publishSpeech('speaking', key);
 
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = 'id-ID';
     utterance.rate = 0.92;
     utterance.pitch = 1.06;
 
-    const voices = window.speechSynthesis.getVoices();
-    const idVoice = voices.find(v => v.lang.includes('id') || v.lang.includes('ID') || v.name.toLowerCase().includes('indonesia'));
-    if (idVoice) {
-      utterance.voice = idVoice;
+    try {
+      const voices = window.speechSynthesis.getVoices();
+      const idVoice = voices.find(v => v.lang.toLowerCase().includes('id')
+        || v.name.toLowerCase().includes('indonesia'));
+      if (idVoice) utterance.voice = idVoice;
+
+      const finishRequest = () => {
+        if (requestId !== this.speechRequestId) return;
+        this.speakingText = null;
+        this.publishSpeech('idle');
+      };
+
+      utterance.onend = finishRequest;
+      utterance.onerror = finishRequest;
+      utterance.onstart = () => {
+        if (requestId === this.speechRequestId) this.publishSpeech('speaking', key);
+      };
+
+      window.speechSynthesis.speak(utterance);
+    } catch (error) {
+      console.warn('speechSynthesis error:', error);
+      this.speakingText = null;
+      this.publishSpeech('idle');
     }
-
-    utterance.onstart = () => {
-      this.speakingText = text;
-      if (onStart) onStart();
-    };
-
-    utterance.onend = () => {
-      this.speakingText = null;
-      if (onEnd) onEnd();
-    };
-
-    utterance.onerror = () => {
-      this.speakingText = null;
-      if (onEnd) onEnd();
-    };
-
-    window.speechSynthesis.speak(utterance);
   }
 
   public getSpeakingText(): string | null {
@@ -237,10 +279,16 @@ class SoundEngine {
   }
 
   public stopSpeech(): void {
+    this.speechRequestId += 1;
     this.speakingText = null;
     if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
-      window.speechSynthesis.cancel();
+      try {
+        window.speechSynthesis.cancel();
+      } catch (error) {
+        console.warn('speechSynthesis.cancel error:', error);
+      }
     }
+    this.publishSpeech(this.muted ? 'muted' : 'idle');
   }
 }
 

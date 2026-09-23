@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { containerVariants, itemVariants, tapScale } from '@/lib/motion';
 import { labTextsData, type LabStory } from '@/data/learningData';
 import { sound } from '@/lib/audio';
+import { useTts } from '@/hooks/useTts';
 import {
   Volume2,
   Square,
@@ -18,14 +19,13 @@ export const LabTab: React.FC = () => {
   const [highlightMode, setHighlightMode] = useState<'none' | 'utama' | 'penjelas' | 'all' | 'custom'>('none');
   const [activeSentenceId, setActiveSentenceId] = useState<string | number | null>(null);
   const [activeSnippet, setActiveSnippet] = useState<string | null>(null);
-  const [isSpeaking, setIsSpeaking] = useState<boolean>(false);
+  const tts = useTts();
 
   const currentStory: LabStory = labTextsData.find(t => t.id === selectedStoryId) || labTextsData[0];
 
   const handleSelectStory = (id: string) => {
     sound.playTap();
     sound.stopSpeech();
-    setIsSpeaking(false);
     setSelectedStoryId(id);
     setHighlightMode('none');
     setActiveSentenceId(null);
@@ -34,18 +34,11 @@ export const LabTab: React.FC = () => {
 
   const handleToggleTts = () => {
     sound.playTap();
-    if (isSpeaking) {
-      sound.stopSpeech();
-      setIsSpeaking(false);
-    } else {
-      setIsSpeaking(true);
-      sound.speakText(
-        currentStory.fullText,
-        () => setIsSpeaking(true),
-        () => setIsSpeaking(false)
-      );
-    }
+    tts.toggle(currentStory.fullText, `lab:${currentStory.id}`);
   };
+
+  const storySpeechKey = `lab:${currentStory.id}`;
+  const isSpeaking = tts.isSpeaking(storySpeechKey);
 
   const handleSentenceClick = (sid: string | number) => {
     sound.playTap();
@@ -89,12 +82,17 @@ export const LabTab: React.FC = () => {
           <div>
             <motion.button
               whileTap={tapScale}
+              type="button"
+              disabled={tts.muted}
+              aria-pressed={isSpeaking}
+              aria-label={tts.muted ? 'Suara dimatikan' : isSpeaking ? 'Hentikan suara cerita' : 'Dengarkan suara cerita'}
               onClick={handleToggleTts}
               className={`font-bold px-4 py-2.5 rounded-xl text-xs sm:text-sm flex items-center gap-2 transition-all shadow-sm ${
                 isSpeaking
                   ? 'bg-rose-500 text-white animate-pulse'
                   : 'bg-amber-100 dark:bg-amber-950/70 hover:bg-amber-200 dark:hover:bg-amber-900 text-amber-800 dark:text-amber-200 border border-amber-300 dark:border-amber-700'
               }`}
+              title={tts.muted ? 'Suara dimatikan' : isSpeaking ? 'Hentikan Suara' : 'Dengarkan Suara'}
             >
               {isSpeaking ? (
                 <>
@@ -235,14 +233,18 @@ export const LabTab: React.FC = () => {
                   }
                 }
 
+                const isSelected = highlightMode === 'custom' && activeSentenceId === s.id;
+
                 return (
-                  <span
+                  <button
                     key={s.id}
+                    type="button"
+                    aria-pressed={isSelected}
                     onClick={() => handleSentenceClick(s.id)}
-                    className={`sentence-interactive font-medium text-slate-800 dark:text-slate-100 text-base sm:text-lg ${highlightClass}`}
+                    className={`sentence-interactive font-medium text-slate-800 dark:text-slate-100 text-base sm:text-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-sky-500 ${highlightClass}`}
                   >
                     {s.text}
-                  </span>
+                  </button>
                 );
               })}
             </div>
