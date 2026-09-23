@@ -2,7 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { tapScale } from '@/lib/motion';
 import { sound } from '@/lib/audio';
-import { navItems, type TabId } from './Navbar';
+import { navItems, type TabId } from './navItems';
 
 interface BottomNavProps {
   activeTab: TabId;
@@ -11,7 +11,7 @@ interface BottomNavProps {
 
 export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, onSelectTab }) => {
   return (
-    <nav className="no-print sm:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-lg border-t border-slate-200/90 dark:border-slate-800 shadow-[0_-4px_16px_rgba(0,0,0,0.06)] px-2 py-1.5 pb-safe">
+    <nav aria-label="Navigasi utama" className="no-print xl:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-lg border-t border-slate-200/90 dark:border-slate-800 shadow-[0_-4px_16px_rgba(0,0,0,0.06)] px-2 safe-area-bottom">
       <div className="flex items-center justify-around max-w-md mx-auto">
         {navItems.map(item => {
           const Icon = item.icon;
@@ -38,6 +38,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, onSelectTab }) 
                   ? 'text-amber-600 dark:text-amber-400 font-extrabold'
                   : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
               }`}
+              aria-current={isActive ? 'page' : undefined}
             >
               {isActive && (
                 <motion.div

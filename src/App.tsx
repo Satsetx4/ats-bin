@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Navbar, type TabId } from '@/components/Navbar';
+import { MotionConfig, useReducedMotion } from 'framer-motion';
+import { Navbar } from '@/components/Navbar';
+import type { TabId } from '@/components/navItems';
 import { BottomNav } from '@/components/BottomNav';
 import { DetectiveModal, type ModalProps } from '@/components/DetectiveModal';
 import { MateriTab } from '@/components/tabs/MateriTab';
@@ -7,13 +9,23 @@ import { LabTab } from '@/components/tabs/LabTab';
 import { GamesTab } from '@/components/tabs/GamesTab';
 import { QuizTab } from '@/components/tabs/QuizTab';
 import { WorksheetTab } from '@/components/tabs/WorksheetTab';
-import { safeStorage, getInitialTheme, applyTheme, type ThemeMode } from '@/lib/storage';
+import { safeStorage, getInitialTheme, applyTheme, STORAGE_KEYS, type ThemeMode } from '@/lib/storage';
 import { sound } from '@/lib/audio';
+import { useTts } from '@/hooks/useTts';
+
+function isTabId(value: unknown): value is TabId {
+  return value === 'materi' || value === 'lab' || value === 'games'
+    || value === 'quiz' || value === 'worksheet';
+}
 
 export const App: React.FC = () => {
   const [theme, setTheme] = useState<ThemeMode>(getInitialTheme);
-  const [activeTab, setActiveTab] = useState<TabId>(() => safeStorage.get<TabId>('ats_active_tab', 'materi'));
-  const [isMuted, setIsMuted] = useState<boolean>(() => sound.muted);
+  const [activeTab, setActiveTab] = useState<TabId>(() => {
+    const savedTab = safeStorage.get<unknown>(STORAGE_KEYS.activeTab, null);
+    return isTabId(savedTab) ? savedTab : 'materi';
+  });
+  const speech = useTts();
+  const prefersReducedMotion = useReducedMotion();
 
   // Modal State
   const [modalConfig, setModalConfig] = useState<ModalProps>({
@@ -31,7 +43,7 @@ export const App: React.FC = () => {
 
   // Save active tab
   useEffect(() => {
-    safeStorage.set('ats_active_tab', activeTab);
+    safeStorage.set(STORAGE_KEYS.activeTab, activeTab);
   }, [activeTab]);
 
   const handleToggleTheme = () => {
@@ -40,14 +52,13 @@ export const App: React.FC = () => {
   };
 
   const handleToggleSound = () => {
-    const muted = sound.toggleMute();
-    setIsMuted(muted);
+    sound.toggleMute();
   };
 
   const handleSelectTab = (tab: TabId) => {
     sound.stopSpeech();
     setActiveTab(tab);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo({ top: 0, behavior: prefersReducedMotion ? 'auto' : 'smooth' });
   };
 
   const showModal = (
@@ -93,6 +104,7 @@ export const App: React.FC = () => {
   };
 
   return (
+    <MotionConfig reducedMotion="user">
     <div className="min-h-screen bg-gradient-to-br from-amber-50 via-sky-50 to-emerald-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 text-slate-800 dark:text-slate-100 flex flex-col antialiased transition-colors duration-300">
       {/* Top Navbar */}
       <Navbar
@@ -100,22 +112,24 @@ export const App: React.FC = () => {
         onSelectTab={handleSelectTab}
         theme={theme}
         onToggleTheme={handleToggleTheme}
-        isMuted={isMuted}
+        isMuted={speech.muted}
         onToggleSound={handleToggleSound}
         onRequestReset={handleRequestReset}
       />
 
       {/* Main Content Area */}
-      <main className="flex-grow max-w-6xl w-full mx-auto p-4 sm:p-6 pb-20 sm:pb-8">
+      <main className="app-main-content flex-grow max-w-6xl w-full mx-auto p-4 sm:p-6 pb-20 xl:pb-8">
         {activeTab === 'materi' && <MateriTab />}
         {activeTab === 'lab' && <LabTab />}
         {activeTab === 'games' && <GamesTab onShowModal={showModal} />}
-        {activeTab === 'quiz' && <QuizTab onShowModal={showModal} />}
+        <section hidden={activeTab !== 'quiz'} aria-hidden={activeTab !== 'quiz'}>
+          <QuizTab onShowModal={showModal} />
+        </section>
         {activeTab === 'worksheet' && <WorksheetTab />}
       </main>
 
       {/* Footer */}
-      <footer className="no-print mt-auto bg-white/80 dark:bg-slate-900/80 border-t border-slate-200/80 dark:border-slate-800 py-6 text-center text-xs text-slate-500 dark:text-slate-400">
+      <footer className="no-print mt-auto bg-white/80 dark:bg-slate-900/80 border-t border-slate-200/80 dark:border-slate-800 py-6 pb-24 xl:pb-6 text-center text-xs text-slate-500 dark:text-slate-400">
         <div className="max-w-6xl mx-auto px-4 space-y-1.5">
           <p className="font-bold text-slate-700 dark:text-slate-300">
             Materi Interaktif Bahasa Indonesia Kelas 3 SD • Kurikulum Merdeka
@@ -140,5 +154,6 @@ export const App: React.FC = () => {
       {/* Detective Cartoon Modal */}
       <DetectiveModal {...modalConfig} />
     </div>
+    </MotionConfig>
   );
 };

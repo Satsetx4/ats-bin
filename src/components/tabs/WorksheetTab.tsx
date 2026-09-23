@@ -2,11 +2,12 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { containerVariants, itemVariants, tapScale } from '@/lib/motion';
 import { questionBankData } from '@/data/learningData';
+import { selectBalancedQuestions } from '@/lib/exam';
 import { sound } from '@/lib/audio';
 import { Printer } from 'lucide-react';
 
 export const WorksheetTab: React.FC = () => {
-  const selectedForPrint = questionBankData.slice(0, 10);
+  const selectedForPrint = selectBalancedQuestions(questionBankData, 10, () => 0.5);
 
   const handlePrint = () => {
     sound.playTap();
