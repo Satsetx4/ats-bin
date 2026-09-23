@@ -67,21 +67,26 @@ export const WorksheetTab: React.FC = () => {
           </div>
 
           {/* Kolom Identitas Siswa */}
-          <div className="grid grid-cols-2 gap-4 text-xs sm:text-sm border p-3 rounded-lg border-slate-400">
-            <div className="space-y-1.5">
-              <p>
-                <strong>Nama Lengkap:</strong> ..............................................................
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 text-xs sm:text-sm border p-3 rounded-lg border-slate-400">
+            <div className="min-w-0 space-y-1.5">
+              <p className="flex min-w-0 items-end gap-2">
+                <strong className="shrink-0">Nama Lengkap:</strong>
+                <span aria-hidden="true" className="h-5 min-w-0 flex-1 border-b border-dotted border-slate-400" />
               </p>
-              <p>
-                <strong>Nomor Absen:</strong> ..............................................................
+              <p className="flex min-w-0 items-end gap-2">
+                <strong className="shrink-0">Nomor Absen:</strong>
+                <span aria-hidden="true" className="h-5 min-w-0 flex-1 border-b border-dotted border-slate-400" />
               </p>
             </div>
-            <div className="space-y-1.5">
-              <p>
-                <strong>Kelas:</strong> 3 (Tiga) ...................................................
+            <div className="min-w-0 space-y-1.5">
+              <p className="flex min-w-0 items-end gap-2">
+                <strong className="shrink-0">Kelas:</strong>
+                <span>3 (Tiga)</span>
+                <span aria-hidden="true" className="h-5 min-w-0 flex-1 border-b border-dotted border-slate-400" />
               </p>
-              <p>
-                <strong>Hari / Tanggal:</strong> ..............................................................
+              <p className="flex min-w-0 items-end gap-2">
+                <strong className="shrink-0">Hari / Tanggal:</strong>
+                <span aria-hidden="true" className="h-5 min-w-0 flex-1 border-b border-dotted border-slate-400" />
               </p>
             </div>
           </div>
@@ -137,23 +142,27 @@ export const WorksheetTab: React.FC = () => {
           <div className="space-y-4 text-xs sm:text-sm">
             <div>
               <p className="font-bold mb-1">1. Tuliskan ide pokok dari paragraf tentang Rani di atas!</p>
-              <p className="text-slate-400 border-b border-dotted border-slate-400 py-1">
-                Jawab: .................................................................................................................................................................................
+              <p className="flex min-w-0 items-end gap-2 py-1 text-slate-400">
+                <span className="shrink-0">Jawab:</span>
+                <span aria-hidden="true" className="h-5 min-w-0 flex-1 border-b border-dotted border-slate-400" />
               </p>
             </div>
             <div>
               <p className="font-bold mb-1">2. Mengapa Rani membuka jendela kamar tidurnya setiap pagi?</p>
-              <p className="text-slate-400 border-b border-dotted border-slate-400 py-1">
-                Jawab: .................................................................................................................................................................................
+              <p className="flex min-w-0 items-end gap-2 py-1 text-slate-400">
+                <span className="shrink-0">Jawab:</span>
+                <span aria-hidden="true" className="h-5 min-w-0 flex-1 border-b border-dotted border-slate-400" />
               </p>
             </div>
             <div>
               <p className="font-bold mb-1">3. Sebutkan 2 kalimat penjelas yang ada pada teks bacaan di atas!</p>
-              <p className="text-slate-400 border-b border-dotted border-slate-400 py-1">
-                a) .....................................................................................................................................................................................
+              <p className="flex min-w-0 items-end gap-2 py-1 text-slate-400">
+                <span className="shrink-0">a)</span>
+                <span aria-hidden="true" className="h-5 min-w-0 flex-1 border-b border-dotted border-slate-400" />
               </p>
-              <p className="text-slate-400 border-b border-dotted border-slate-400 py-1">
-                b) .....................................................................................................................................................................................
+              <p className="flex min-w-0 items-end gap-2 py-1 text-slate-400">
+                <span className="shrink-0">b)</span>
+                <span aria-hidden="true" className="h-5 min-w-0 flex-1 border-b border-dotted border-slate-400" />
               </p>
             </div>
           </div>
